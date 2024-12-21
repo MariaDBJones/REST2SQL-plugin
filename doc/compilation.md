@@ -2,10 +2,15 @@
 
 * download [Dockerfile](https://github.com/SylvainA77/JSON2SQL-plugin/blob/main/docker/rockylinux/Dockerfile) 
 * build once : docker build --no-cache -t json2sql:latest .   
-  *  Container is built with all the tools and scripts  
-* run many : docker run -it json2sql    
-  *  To clone a branch in /app : clone.sh <branch> , leave <branch> empty to clone main
-  *  To forcefully deploy the lib and start mariadb daemon, call launchmaria.sh  
+  *  Container is built with all the tools and scripts
+  *  check env variables in case you want to change the cloned branch  
+* run many : docker run -it json2sql
+  * make the command exeuctables : chmod +x /opt/*  
+  *  To clone a branch in /app : clone
+  *  To build in /app/plugin : build
+  *  To deploy the lib from /app/plugin and start mariadb daemon : deploy
+  *  To test ${resource} : call ${resource}
+  *  To cleanup for a new build : clean  
 
 ## Sources :  
 [1] https://mariadb.org/installing-plugins-in-the-mariadb-docker-library-container/  
