@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 // MariaDB headers
 #include <mysql.h>
