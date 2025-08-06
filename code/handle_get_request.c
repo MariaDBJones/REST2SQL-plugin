@@ -9,14 +9,41 @@ cJSON* handle_get_request(const char *url) {
     char schema[64] = {0};
     char table[64] = {0};
     char column[64] = {0};
-    char value[256] = {0};
+    char value[296] = {0};
     char query[1024] = {0};
 #if DEBUG == 1
     struct timeval tv;
     char timestamp[30];
     char microtimestamp[40];
     struct tm *local;
+
+//get current time with microsecond precision
+    gettimeofday(&tv, NULL);
+// Convert to local time and format as a string
+    local = localtime(&tv.tv_sec);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", local);
+    snprintf(microtimestamp, sizeof(microtimestamp), "%s.%06ld", timestamp, tv.tv_usec);
+    cJSON_AddStringToObject(json_response, "begin", microtimestamp);
 #endif
+
+// URL length verification before parsing
+    if (strlen(url) > 506) {
+// BAD REQUEST
+        cJSON_AddStringToObject(json_response, "error", "URL too long");
+        cJSON_AddNumberToObject(json_response, "httpcode", HTTP_BAD_REQUEST);
+
+#if DEBUG == 1
+//get current time with microsecond precision
+        gettimeofday(&tv, NULL);
+// Convert to local time and format as a string
+        local = localtime(&tv.tv_sec);
+        strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", local);
+        snprintf(microtimestamp, sizeof(microtimestamp), "%s.%06ld", timestamp, tv.tv_usec);
+        cJSON_AddStringToObject(json_response, "end", microtimestamp);
+#endif
+
+        return json_response;
+    }
     
     cJSON *json_response = cJSON_CreateObject();
 
@@ -30,7 +57,7 @@ cJSON* handle_get_request(const char *url) {
     cJSON_AddStringToObject(json_response, "begin", microtimestamp);
 #endif
 
-    int nb_tokens = sscanf(url, "/%63[^/]/%63[^/]/%63[^/]/%63[^/]/%63[^/]/%255s",
+    int nb_tokens = sscanf(url, "/%63[^/]/%63[^/]/%63[^/]/%63[^/]/%63[^/]/%295s",
                           version, resource, schema, table, column, value);
 
     cJSON_AddStringToObject(json_response, "apiversion", version);
