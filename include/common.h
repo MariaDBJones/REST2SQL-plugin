@@ -19,6 +19,10 @@
 #include <mysql.h>
 #include <mysql/service_sql.h>
 
+// time logging
+#include <time.h>
+#include <sys/time.h>
+
 // cJSON headers
 #include <cjson/cJSON.h>
 
