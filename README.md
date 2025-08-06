@@ -13,7 +13,7 @@ The goal is to provide an easy way to map simple DML statements and stored proce
 
 ## Direct tables access
 
-* [GET → SELECT](https://github.com/SylvainA77/JSON-API-plugin/blob/main/doc/handle_get_request.md)  
+* [GET → SELECT/DESC](https://github.com/SylvainA77/JSON-API-plugin/blob/main/doc/handle_get_request.md)  
 
 * [POST → INSERT](https://github.com/SylvainA77/JSON2SQL-plugin/blob/main/doc/handle_post_request.md)  
 
