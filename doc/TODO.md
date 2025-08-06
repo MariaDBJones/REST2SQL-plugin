@@ -1,20 +1,27 @@
 # List of identified & needed features
 
 - [ ] ability to subscribe to resources (?)
-- [ ] linking subscription to a mrdb user privileges (?)
-- [x] handling HTTP response codes
-- [x] handling POST/INSERT
-- [x] handling mutli-lines INSERTs
-- [ ] handling UPSERTS
-- [x] handling PATCH/UPDATE
-- [x] handling DELETE/DELETE
-- [ ] securing the API with HTTPS
+- [ ] resource exposition (dis)allowance
+- [ ] linking subscription to a mrdb user/role (?)
 - [ ] handling credentials with JWT (lib to be choosen)
-- [ ] handling simple joins for select (really ?)
+- [ ] securing the API with HTTPS
+- [x] handling HTTP response codes
+- [x] handling GET/SELECT
 - [ ] handling simple sort order
-- [x] handling PUT/CALL stored procedure 
-- [x] using global/local internal connexion
+- [ ] handling simple joins (???)
+- [x] data resource
+- [x] ping resource
+- [x] status resource
+- [x] structure resource
+- [ ] handling POST/INSERT
+- [ ] handling mutli-lines INSERTs (??)
+- [ ] handling UPSERTS (?)
+- [ ] handling PATCH/UPDATE
+- [ ] handling DELETE/DELETE
+- [ ] handling PUT/CALL stored procedure (?)
+- [ ] using global/local internal connexion (??)
 - [ ] add status variables : have_json2sql, counters
 - [ ] add system variables : address, port, resource exposition list
+- [ ] semantic check to verify schema, table and columns do exist
 
-No order of importance here.
+No order of importance here but the more ? the less probable it'll happen
