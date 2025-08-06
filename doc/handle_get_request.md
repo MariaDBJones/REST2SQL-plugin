@@ -4,11 +4,13 @@
 
 * GET /v1/status/                                  → SHOW GLOBAL STATUS
   
-* GET /v1/                                         → OK
+* GET /v1/ping                                     → OK  
+
+* GET /v1/health                                   → now()
 
 ## Function declaration
 
-in [handle_get_request.h]() : static char* response handle_get_request(const char *url)  
+in [handle_get_request.h]() : static cJSON* response handle_get_request(const char *url)  
 
 ## Source file
 
@@ -47,10 +49,19 @@ in [handle_get_request.h]() : static char* response handle_get_request(const cha
   ]
 
 }
-### STATUS resource
+### PING resource
 
-### v1 resource
 {
+  "ping": "pong",
+  "status": "OK",
+  "httpcode": 200
+}
+
+### HEALTH resource
+
+{
+  "health": "OK",
+  "now": "YYYYMMDD-HHMISS"
   "status": "OK",
   "httpcode": 200
 }
