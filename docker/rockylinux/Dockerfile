@@ -31,7 +31,7 @@ ENV GITBRANCH=GET
 RUN printf "[mariadb]\nplugin-load-add=libjson2sql\nplugin_maturity=unknown\nskip-name-resolve\n" > /etc/load_jsonplugin.cnf
 
 # utilities
-RUN printf "#!/bin/bash \n mariadb -e'grant select on *.* to \'api\'@\'localhost\' identified by \'passw0rd\';'" > user
+RUN printf '#!/bin/bash\nmariadb -e '\''grant process, select on *.* to `api`@`localhost` identified by '\''passw0rd'\'''\''\n' > user
 RUN printf "#!/bin/bash \n cd /app \n git clone -b $GITBRANCH --single-branch --depth 1 https://github.com/MariaDBJones/json2sql-plugin.git . \n mkdir build \n cd build \n cmake .. \n" > clone
 RUN printf "#!/bin/bash \n cd /app/build \n cmake --build . --verbose \n" > build
 RUN printf "#!/bin/bash \n cp -f /app/plugin/libjson2sql.so /usr/lib64/mysql/plugin/ \n mariadbd-safe --defaults-extra-file=/etc/load_jsonplugin.cnf & && grep plugin /var/lib/mysql/*.err" > deploy
