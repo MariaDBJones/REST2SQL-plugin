@@ -11,11 +11,13 @@ cJSON* handle_get_request(const char *url) {
     char column[64] = {0};
     char value[256] = {0};
     char query[1024] = {0};
+#if DEBUG == 1
     struct timeval tv;
     char timestamp[30];
     char microtimestamp[40];
     struct tm *local;
-
+#endif
+    
     cJSON *json_response = cJSON_CreateObject();
 
 #if DEBUG == 1
