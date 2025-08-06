@@ -1,185 +1,220 @@
-#include "common.h"
+#include <common.h>
+#include <mysql/mysql.h>
+#include <time.h>
+#include <sys/time.h>
 
-#define GETLOG 1
+// in CRUD : GET => READ
+cJSON* handle_get_request(const char *url) {
+// 1. URL parsing w/ sscanf
+    char version[64] = {0};
+    char resource[64] = {0};
+    char schema[64] = {0};
+    char table[64] = {0};
+    char column[64] = {0};
+    char value[256] = {0};
+    char sql_query[1024] = {0};
+    struct timeval tv;
+    char timestamp[30];
+    char microtimestamp[40];
+    struct tm *local;
 
-char* handle_get_request(const char *url) {
-// initialize the JSON answer
-    cJSON *json = cJSON_CreateObject();
-    char *answerget;
-    char version[64]="v1";
-    char resource[64]="";
-    char schema[64]="";
-    char object[64]="";
-    char column[64]="";
-    char value[64]="";
-    char *query=NULL;
-    unsigned int action = 0;
-    MYSQL *cnx;
-// 2 = sql needed
-// 1 = direct answere
-// 0 = exec not possible
+    cJSON *json_response = cJSON_CreateObject();
 
-// extracting tokens from url
-    int tokens = sscanf(url, "/%63[^/]/%63[^/]/%63[^/]/%63[^/]/%63[^/]/%63[^/]", version, resource, schema, object, column, value);
-// end token extraction
+//get current time with microsecond precision
+    gettimeofday(&tv, NULL);
+// Convert to local time and format as a string
+    local = localtime(&tv.tv_sec);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", local);
+    snprintf(microtimestamp, sizeof(microtimestamp), "%s.%06ld", timestamp, tv.tv_usec);
+    cJSON_AddStringToObject(json_response, "begin", microtimestamp);
 
-int isresourcent=0;
-if (strchr(resource, '\0') != NULL) {
-// String is null-terminated
-    isresourcent=1;
-}
-    cJSON_AddStringToObject(json, "status", "HANDLER");
-    cJSON_AddStringToObject(json, "method", "GET");
-    cJSON_AddStringToObject(json, "url", url);
-    cJSON_AddNumberToObject(json, "tokens", tokens);
+    int nb_tokens = sscanf(url, "/%63[^/]/%63[^/]/%63[^/]/%63[^/]/%63[^/]/%255s",
+                          version, resource, schema, table, column, value);
 
-// analyzing toeksn to match patterns and resources
-// 4 possibilites :
-// - tokens = 2 && resource in (ping, healthcheck, status)
-// - tokens = 4 && resource = tables
-// - tokens = 6 && resource = tables
+    cJSON_AddStringToObject(json_response, "apiversion", version);
+    cJSON_AddStringToObject(json_response, "url", url);
+
+// removing eventual trailing / to value
+    size_t length = strlen(value);
+    while (length > 0 && value[length - 1] == '/') {
+        value[length - 1] = '\0';
+        length--;
+    }
+
+// 2. analyzing tokens to match patterns and resources
+// 3 possibilites :
+// - resource in (ping, health, status)
+// - resource = READ && 6 tokens
 // - bad request format
-switch(tokens) {
-    case 2:
-#if GETLOG ==1
-      cJSON_AddStringToObject(json, "version", version);
-      cJSON_AddStringToObject(json, "resource", resource);
-      cJSON_AddNumberToObject(json, "strlen resource",strlen(resource));
-      cJSON_AddNumberToObject(json, "sizeof resrouce",sizeof(resource));
-      cJSON_AddNumberToObject(json, "strchr resource null is not null", isresourcent);
-#endif // GETLOG
-      if ( strncasecmp(resource, "ping", 63) == 0 ) {
-         cJSON_AddStringToObject(json, "action", "PING");
-         cJSON_AddNumberToObject(json, "httpcode", HTTP_OK);
-         cJSON_AddStringToObject(json, "message", "pong");
-      } else if ( strncasecmp(resource, "status", 63) == 0 ) {
-         char tmp[1]="";
-         int length = snprintf(tmp, 1, "SELECT * FROM INFORMATION_SCHEMA.GLOBAL_STATUS");
-         query=malloc(length+1);
-         snprintf(query, length+1 , "SELECT * FROM INFORMATION_SCHEMA.GLOBAL_STATUS");
-#if GETLOG == 1
-         cJSON_AddStringToObject(json, "action", "STATUS");
-         cJSON_AddNumberToObject(json, "query length", length);
-         cJSON_AddStringToObject(json, "expected query", "SELECT * FROM INFORMATION_SCHEMA.GLOBAL_STATUS");
-         cJSON_AddNumberToObject(json, "final query length", strlen(query));
-#endif // GETLOG
-      }  else if ( strncasecmp(resource, "healthcheck",63) == 0 ) {
-         char tmp[1]="";
-         int length = snprintf(tmp, 1, "SELECT now() as NOW");
-         query=malloc(length+1);
-         snprintf(query, length+1, "SELECT now() as NOW");
-#if GETLOG == 1
-         cJSON_AddStringToObject(json, "action", "HEALTHCHECK");
-         cJSON_AddStringToObject(json, "expected query", "SELECT now() as NOW");
-         cJSON_AddNumberToObject(json, "expected query length", length);
-         cJSON_AddNumberToObject(json, "final query length", strlen(query));
-#endif // GETLOG
-      } else {
-         cJSON_AddStringToObject(json, "action", "ERROR");
-         cJSON_AddStringToObject(json, "error", "Invalid GET request");
-         cJSON_AddNumberToObject(json, "httpcode", HTTP_BAD_REQUEST);
-         answerget = cJSON_PrintUnformatted(json);
-         free(query);
-         cJSON_Delete(json);
-         return answerget;
-      }
-    break; // end tokens=2
-    case 4:
-#if GETLOG == 1
-      cJSON_AddStringToObject(json, "version", version);
-      cJSON_AddStringToObject(json, "resource", resource);
-      cJSON_AddStringToObject(json, "schema", schema);
-      cJSON_AddStringToObject(json, "table", object);
-      cJSON_AddNumberToObject(json, "sizeof resrouce",sizeof(resource));
-      cJSON_AddNumberToObject(json, "strchr resource null is not null", isresourcent);
-      cJSON_AddStringToObject(json, "action",   "QUERY");
-#endif // GETLOG
-      cJSON_AddStringToObject(json, "message",  "developped later");
-      cJSON_AddNumberToObject(json, "httpcode", HTTP_OK);
-    break; // end tokens=4
-   case 6:
-#if GETLOG == 1
-      cJSON_AddStringToObject(json, "version", version);
-      cJSON_AddStringToObject(json, "resource", resource);
-      cJSON_AddStringToObject(json, "schema", schema);
-      cJSON_AddStringToObject(json, "table", object);
-      cJSON_AddStringToObject(json, "column", column);
-      cJSON_AddStringToObject(json, "value", value);
-      cJSON_AddNumberToObject(json, "strlen resource",strlen(resource));
-      cJSON_AddNumberToObject(json, "sizeof resrouce",sizeof(resource));
-      cJSON_AddNumberToObject(json, "strchr resource null is not null", isresourcent);
-      cJSON_AddStringToObject(json, "action",   "QUERY");
-#endif // GETLOG
-      char tmp[1]="";
-      int length = snprintf(tmp, 1, "SELECT * FROM %s.%s WHERE %s = '%s'", schema, object, column, value);
-      query=malloc(length+1);
-      snprintf(query, length+1 , "SELECT * FROM %s.%s WHERE %s = '%s'", schema, object, column, value);
-#if GETLOG == 1
-      cJSON_AddNumberToObject(json, "query length", length);
-      cJSON_AddNumberToObject(json, "final query length", strlen(query));
-      cJSON_AddStringToObject(json, "query", query);
-#endif
-    break; // end tokens=6
-    default:
-      cJSON_AddStringToObject(json, "action", "ERROR");
-      cJSON_AddStringToObject(json, "error", "Invalid GET request");
-      cJSON_AddNumberToObject(json, "httpcode", HTTP_BAD_REQUEST);
-      answerget = cJSON_PrintUnformatted(json);
-      cJSON_Delete(json);
-      free(query);
-      return answerget;
-}
-// end decision making
 
-log_message("query time");
-    if (query != NULL) {
-// assigned
-        cJSON_AddStringToObject(json, "todo", query);
-log_message("cnx time");
-// we establish internal local connexion
-        cnx = mysql_init(NULL);
-if (!cnx) {
-log_message("cnx init failed");
-          cJSON_AddStringToObject(json, "cnx status", "CONNECTION failed");
-          cJSON_AddNumberToObject(json, "mariadbcode", mysql_errno(cnx));
-          cJSON_AddNumberToObject(json, "httpcode", HTTP_INTERNAL_SERVER_ERROR);
-          // clean exit procedure
-          char *json_string = cJSON_PrintUnformatted(json);
-          cJSON_Delete(json);
-          return json_string; // Caller is responsible for freeing this memory
-}
-log_message("cnx init ok");
-//        if (mysql_real_connect_local(cnx) == NULL) {
-          if (mysql_real_connect(cnx, "localhost", NULL, NULL, NULL, 3306, NULL, 0) == NULL ) {
-log_message("cnx failed");
-          cJSON_AddStringToObject(json, "cnx status", "CONNECTION failed");
-          cJSON_AddNumberToObject(json, "mariadbcode", mysql_errno(cnx));
-          cJSON_AddNumberToObject(json, "httpcode", HTTP_INTERNAL_SERVER_ERROR);
-          // clean exit procedure
-          char *json_string = cJSON_PrintUnformatted(json);
-          cJSON_Delete(json);
-          return json_string; // Caller is responsible for freeing this memory
-        } else {
-log_message("cnx ok");
-          cJSON_AddStringToObject(json, "cnx status", "CONNECTION OK");
-          cJSON_AddNumberToObject(json, "mariadbcode", mysql_errno(cnx));
-          cJSON_AddNumberToObject(json, "httpcode", HTTP_OK);
-          mysql_close(cnx);
-        }
+//// Testing resource type
+    if (strcasecmp(resource, "ping") == 0) {
+// PING
+        cJSON_AddStringToObject(json_response, "ping", "pong");
+        cJSON_AddNumberToObject(json_response, "httpcode", HTTP_OK);
+        return json_response;
+    } else if (strcasecmp(resource, "health") == 0) {
+// HEALTHCHECK
+       snprintf(sql_query, sizeof(sql_query),
+             "SELECT now()");
+        cJSON_AddStringToObject(json_response, "SQL", sql_query);
+    } else if (strcasecmp(resource, "status") == 0) {
+// GLOBAL STATUS
+        snprintf(sql_query, sizeof(sql_query),
+             "SHOW GLOBAL STATUS");
+        cJSON_AddStringToObject(json_response, "SQL", sql_query);
+    } else if (strcasecmp(resource, "read") == 0 && nb_tokens == 6) {
+// READ
+        snprintf(sql_query, sizeof(sql_query),
+             "SELECT * FROM %s.%s WHERE %s='%s'",
+             schema, table, column, value);
+        cJSON_AddStringToObject(json_response, "SQL", sql_query);
+   } else {
+// BAD REQUEST
+        cJSON_AddStringToObject(json_response, "error", "BAD REQUEST");
+        cJSON_AddNumberToObject(json_response, "httpcode", HTTP_BAD_REQUEST);
+        return json_response;
     }
-#if GETLOG == 1
-else {
-//not assigned
-log_message("no query");
-        cJSON_AddStringToObject(json, "todo", "nothing");
+
+//get current time with microsecond precision
+    gettimeofday(&tv, NULL);
+// Convert to local time and format as a string
+    local = localtime(&tv.tv_sec);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", local);
+    snprintf(microtimestamp, sizeof(microtimestamp), "%s.%06ld", timestamp, tv.tv_usec);
+    cJSON_AddStringToObject(json_response, "after resource check", microtimestamp);
+
+//// 3. Local connexion to MariaDB
+// connexion handle
+    MYSQL *conn = mysql_init(NULL);
+    if (conn == NULL) {
+        cJSON_AddStringToObject(json_response, "cnx handle", "KO");
+        cJSON_AddStringToObject(json_response, "errno", mysql_error(conn));
+        cJSON_AddNumberToObject(json_response, "httpcode", HTTP_INTERNAL_SERVER_ERROR);
+        return json_response;
     }
-#endif // GETLOG
+     cJSON_AddStringToObject(json_response, "cnx handle", "OK");
 
-// housekeeping
-    answerget = cJSON_PrintUnformatted(json);
-    cJSON_Delete(json);
-    free(query);
-//end housekeeping
+//get current time with microsecond precision
+    gettimeofday(&tv, NULL);
+// Convert to local time and format as a string
+    local = localtime(&tv.tv_sec);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", local);
+    snprintf(microtimestamp, sizeof(microtimestamp), "%s.%06ld", timestamp, tv.tv_usec);
+    cJSON_AddStringToObject(json_response, "before cnx", microtimestamp);
 
-return answerget;
-} // end function
+// actual connexion
+// through socket
+    if(mysql_real_connect(conn, "localhost", "api", "passw0rd",
+                      NULL, 0, "/var/lib/mysql/mysql.sock", 0) == NULL ) {
+// through network port
+//    if(mysql_real_connect(conn, "localhost", "api", "passw0rd",
+//                  NULL, 3306, NULL, 0) == NULL ) {
+        cJSON_AddStringToObject(json_response, "cnx", "KO");
+        cJSON_AddStringToObject(json_response, "errno", mysql_error(conn));
+        cJSON_AddNumberToObject(json_response, "httpcode", HTTP_INTERNAL_SERVER_ERROR);
+        mysql_close(conn);
+        return json_response;
+    }
+    cJSON_AddStringToObject(json_response, "cnx", "OK");
+
+//get current time with microsecond precision
+    gettimeofday(&tv, NULL);
+// Convert to local time and format as a string
+    local = localtime(&tv.tv_sec);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", local);
+    snprintf(microtimestamp, sizeof(microtimestamp), "%s.%06ld", timestamp, tv.tv_usec);
+    cJSON_AddStringToObject(json_response, "after cnx handle", microtimestamp);
+
+// Avant mysql_query, ajoutez :
+//unsigned int timeout = 1;
+//mysql_options(conn, MYSQL_OPT_CONNECT_TIMEOUT, &timeout);
+//mysql_options(conn, MYSQL_OPT_READ_TIMEOUT, &timeout);
+//mysql_options(conn, MYSQL_OPT_PROTOCOL, MYSQL_PROTOCOL_SOCKET);  // Force socket
+// 4. statement execution
+    if(mysql_query(conn, sql_query)) {
+        cJSON_AddStringToObject(json_response, "stmt exec", "KO");
+        cJSON_AddStringToObject(json_response, "errno", mysql_error(conn));
+        cJSON_AddNumberToObject(json_response, "httpcode", HTTP_INTERNAL_SERVER_ERROR);
+        mysql_close(conn);
+        return json_response;
+    }
+    cJSON_AddStringToObject(json_response, "stmt exec", "OK");
+
+//get current time with microsecond precision
+    gettimeofday(&tv, NULL);
+// Convert to local time and format as a string
+    local = localtime(&tv.tv_sec);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", local);
+    snprintf(microtimestamp, sizeof(microtimestamp), "%s.%06ld", timestamp, tv.tv_usec);
+    cJSON_AddStringToObject(json_response, "after stmt exec", microtimestamp);
+
+//// creating the result buffer
+    MYSQL_RES *result = mysql_store_result(conn);
+    if(result == NULL) {
+        cJSON_AddStringToObject(json_response, "result fetch", "KO");
+        cJSON_AddStringToObject(json_response, "errno", mysql_error(conn));
+        cJSON_AddNumberToObject(json_response, "httpcode", HTTP_INTERNAL_SERVER_ERROR);
+        mysql_close(conn);
+
+//get current time with microsecond precision
+        gettimeofday(&tv, NULL);
+// Convert to local time and format as a string
+        local = localtime(&tv.tv_sec);
+        strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", local);
+        snprintf(microtimestamp, sizeof(microtimestamp), "%s.%06ld", timestamp, tv.tv_usec);
+        cJSON_AddStringToObject(json_response, "after result buffer KO", microtimestamp);
+
+        return json_response;
+    }
+    cJSON_AddStringToObject(json_response, "result fetch", "OK");
+
+//get current time with microsecond precision
+    gettimeofday(&tv, NULL);
+// Convert to local time and format as a string
+    local = localtime(&tv.tv_sec);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", local);
+    snprintf(microtimestamp, sizeof(microtimestamp), "%s.%06ld", timestamp, tv.tv_usec);
+    cJSON_AddStringToObject(json_response, "after result buffer", microtimestamp);
+
+// 5. answer fetching
+    int num_rows = mysql_num_rows(result);
+    int num_fields = mysql_num_fields(result);
+//    MYSQL_FIELD *fields = mysql_fetch_fields(result);
+//    MYSQL_ROW row;
+
+// 6. Composition du JSON
+//    cJSON *data_array = cJSON_CreateArray();
+
+//    while ((row = mysql_fetch_row(result))) {
+//        cJSON *row_object = cJSON_CreateObject();
+//
+//        for (int i = 0; i < num_fields; i++) {
+//            const char *field_name = fields[i].name;
+//            const char *field_value = row[i] ? row[i] : "NULL";
+//            cJSON_AddStringToObject(row_object, field_name, field_value);
+//        }
+//
+//        cJSON_AddItemToArray(data_array, row_object);
+//    }
+
+//    cJSON_AddItemToObject(json_response, "data", data_array);
+    cJSON_AddNumberToObject(json_response, "rows", num_rows);
+    cJSON_AddNumberToObject(json_response, "fields", num_fields);
+
+//get current time with microsecond precision
+    gettimeofday(&tv, NULL);
+// Convert to local time and format as a string
+    local = localtime(&tv.tv_sec);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", local);
+    snprintf(microtimestamp, sizeof(microtimestamp), "%s.%06ld", timestamp, tv.tv_usec);
+    cJSON_AddStringToObject(json_response, "end", microtimestamp);
+
+    cJSON_AddNumberToObject(json_response, "httpcode", HTTP_OK);
+
+// Nettoyage
+    mysql_free_result(result);
+    mysql_close(conn);
+
+    return json_response;
+}
