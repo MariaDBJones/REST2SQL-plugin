@@ -2,6 +2,8 @@
 ## Contributors
 * Sylvain "MariaDB Jones" Arbaudie : project initiator
 * perplexity : (sometimes whismical) tech advisor
+* claude  : tech advisor
+* mistral : tech advisor
 * Daniel Black : invaluable insights about mariadb plugin development, Dockerfile
 
 ## Tech advisors
