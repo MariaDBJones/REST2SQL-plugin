@@ -2,7 +2,7 @@
 FROM rockylinux/rockylinux:8 AS build
 
 # Add a label for the image author
-LABEL maintainer="arbaudie.it@gmail.com"
+LABEL maintainer="sylvain@arbaudie.it"
 
 # Install necessary tools and libraries
 RUN dnf update -y && yum install -y epel-release
