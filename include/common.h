@@ -37,9 +37,9 @@
 // check for resource exposition
 // extern int is_exposed_resource(const char *url);
 
-#define PLUGIN_NAME          "json2sql"
-#define PLUGIN_AUTHOR        "Sylvain Arbaudie <arbaudie.it@gmail.com>"
-#define PLUGIN_DESCRIPTION   "simple JSON-to-SQL API Plugin for MariaDB"
+#define PLUGIN_NAME          "rest2sql"
+#define PLUGIN_AUTHOR        "Sylvain Arbaudie <sylvain@arbaudie.it>"
+#define PLUGIN_DESCRIPTION   "simple JSON-to-SQL CRUD REST API Plugin for MariaDB"
 
 // corks definitions
 #define GETCORK           0 // inside method handler
@@ -64,27 +64,22 @@
 #define HTTP_METHOD_NOT_ALLOWED     405 // method & resource not compmatible
 #define HTTP_UNSUPPORTED_MEDIA_TYPE 415 // request body format not json
 
-// methodd <=> privilege translation
-// #define GET    "select"
-// #define PUT    "execute"
-// #define POST   "insert"
-// #define PATCH  "update"
-// #define DELETE "delete"
-
-// default exposed resources
-// #define HEALTHCHECK_RESOURCE   "/v1/"
-// #define STATUS_RESOURCE        "/v1/status/"
-// #define SUBSCRIPTION_RESOURCE  "/v1/subscription/"
-// #define RESOURCES_RESOURCE     "/v1/resources/"
+// method <=> privilege translation
+#define GET    "READ"
+#define PUT    "EXECUTE" // TBD
+#define POST   "CREATE"
+#define PATCH  "UPDATE"
+#define DELETE "DELETE"
 
 // ease the use of mysql_real_query
-#define STRING_WITH_LEN(X) (X), ((size_t) (sizeof(X) - 1))
+#define STRING_WITH_SIZE(X) (X), ((size_t) (sizeof(X) - 1))
+#define STRING_WITH_LEN(X) (X), (strlen(X))
 
-// TODO : managing port via a system variable
+// TODO : managing this via system variables
 #define PORT 3000
 #define ADDRESS "0.0.0.0"
+#define APIUSER "api"
 
-// TODO : managing credentials through JWTs and request body
-// #define APIUSER "apiadmin"
+#define DEBUG  1
 
 #endif // GLOBALS_H
