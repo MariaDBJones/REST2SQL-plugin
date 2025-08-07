@@ -174,7 +174,7 @@ cJSON* handle_get_request(const char *url) {
 //mysql_options(conn, MYSQL_OPT_PROTOCOL, MYSQL_PROTOCOL_SOCKET);  // Force socket
 // 4. statement execution
 //    if(mysql_query(conn, query)) {
-      if (mysql_real_query(conn, STRING_WITH_LEN(query))) {
+      if (mysql_real_query(conn, STRING_WITH_STRLEN(query))) {
         cJSON_AddStringToObject(json_response, "stmt exec", "KO");
         cJSON_AddStringToObject(json_response, "errno", mysql_error(conn));
         cJSON_AddNumberToObject(json_response, "httpcode", HTTP_INTERNAL_SERVER_ERROR);
