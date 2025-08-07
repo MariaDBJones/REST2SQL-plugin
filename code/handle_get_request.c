@@ -280,6 +280,7 @@ cJSON* handle_get_request(const char *url) {
 // Nettoyage
     mysql_free_result(result);
     mysql_close(conn);
+    free(conn);
 
     return json_response;
 }
