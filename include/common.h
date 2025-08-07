@@ -76,8 +76,8 @@
 #define DELETE "DELETE"
 
 // ease the use of mysql_real_query
-#define STRING_WITH_SIZE(X) (X), ((size_t) (sizeof(X) - 1))
-#define STRING_WITH_LEN(X) (X), (strlen(X))
+#define STRING_WITH_LEN(X) (X), ((size_t) (sizeof(X) - 1))
+#define STRING_WITH_STRLEN(X) (X), (strlen(X))
 
 // TODO : managing this via system variables
 #define PORT 3000
