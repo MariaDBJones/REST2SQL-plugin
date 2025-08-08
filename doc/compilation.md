@@ -9,7 +9,8 @@
   *  To clone a branch in /app : clone
   *  To build in /app/plugin : build
   *  To deploy the lib from /app/plugin and start mariadb daemon : deploy
-  *  To test ${resource} : call ${resource}
+  *  To test ping : curl -i http://127.0.0.1:3000/v1/ping
+  *  To test status : curl -i http://127.0.0.1:3000/v1/status
   *  To cleanup for a new build : clean  
 
 ## Sources :  
