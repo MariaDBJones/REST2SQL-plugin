@@ -8,6 +8,7 @@
 | ping resource | :white_check_mark: | :white_check_mark: | :white_check_mark: | 0.1 / pre alpha |
 | handling DELETE/DELETE | :white_check_mark: | :white_check_mark: | :white_large_square: | 0.2 / pre alpha |
 | status resource extension | :white_check_mark: | :white_check_mark: | :white_large_square: | 0.2 / pre alpha |
+| default db (I_S, P_S & mysql) not exposed | :white_check_mark: | :white_check_mark: | :white_large_square: | 0.2 / pre alpha |
 | securing the API with HTTPS | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
 | ability to subscribe to resources | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
 | linking subscription to a mrdb role | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
