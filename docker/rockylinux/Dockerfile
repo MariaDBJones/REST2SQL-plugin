@@ -23,7 +23,7 @@ WORKDIR /opt
 ENV PATH="${PATH}:/opt"
 
 # setting the branch name we want to clone
-ENV GITBRANCH=GET
+ENV GITBRANCH=dev
 
 # creating basic config file & utility scripts for easy dev & test
 
