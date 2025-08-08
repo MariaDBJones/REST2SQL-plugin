@@ -14,7 +14,7 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 file(GLOB SOURCES "code/*.c")
 
 # Add the plugin library
-add_library(rests2sql MODULE ${SOURCES})
+add_library(rest2sql MODULE ${SOURCES})
 
 # new school include (afaik)
 target_include_directories(rest2sql
@@ -23,7 +23,7 @@ target_include_directories(rest2sql
         ${CMAKE_SOURCE_DIR}/include
 )
 
-target_link_libraries(rest2sql cjson microhttpd mariadb mysqlservices)
+target_link_libraries(rest2sql cjson microhttpd mysqlservices)
 
 # Set output directory for the plugin
 set_target_properties(rest2sql PROPERTIES
