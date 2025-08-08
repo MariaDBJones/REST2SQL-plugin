@@ -10,4 +10,3 @@ GET /v1/status/
 ```
 
 ### Response
-
