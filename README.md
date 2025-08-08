@@ -10,14 +10,15 @@ The goal is to provide an easy way to map http requests to CRUD-like DML stateme
 
 - **Release**: pre ALPHA
 - **Current Version**: 0.1
+- **dev version**: 0.2  
 - **Status**: Active development
-- **Last Updated**: 20250806
-- **Actual development branch** : GET
+- **Last Updated**: 20250807
+- **Actual development branch** : dev
 
 
 ## Direct tables access
 
-* [GET → SELECT](https://github.com/SylvainA77/JSON-API-plugin/blob/main/doc/handle_get_request.md)  
+* [GET → SELECT/DESC](https://github.com/SylvainA77/JSON-API-plugin/blob/main/doc/handle_get_request.md)  
 
 * [POST → INSERT](https://github.com/SylvainA77/JSON2SQL-plugin/blob/main/doc/handle_post_request.md)  
 
