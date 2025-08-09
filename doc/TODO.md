@@ -22,6 +22,7 @@
 | input sanitation | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.9 / beta |
 | memory management hardening | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.9 / beta |
 | header/CSRF security check | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.9 / beta |
+| fail2ban + unban | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.9 / beta |
 | handling simple sort order | :grey_question: | :grey_question: | :grey_question: | :grey_question: | necessary :grey_question: |
 | handling UPSERTS | :grey_question: | :grey_question: | :grey_question: | :grey_question: | is it CRUD :grey_question: | 
 | handling PUT/CALL stored procedure | :grey_question: | :grey_question: | :grey_question: | :grey_question: |  is it CRUD :grey_question: | 
