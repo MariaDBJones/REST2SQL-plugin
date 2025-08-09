@@ -9,10 +9,11 @@ The goal is to provide an easy way to map http requests to CRUD-like DML stateme
 ## Project Status
 
 - **Release**: pre ALPHA
-- **Current Version**: 0.1
+- **Current release**: 0.1
+- **Current Version**: 0.2
 - **Status**: Active development
-- **Last Updated**: 20250806
-- **Actual development branch** : GET
+- **Last Updated**: 20250809
+- **Actual development branch** : dev
 
 
 ## Direct tables access
