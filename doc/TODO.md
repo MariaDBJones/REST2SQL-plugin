@@ -1,4 +1,5 @@
 # List of identified & needed features
+
 | feature | accepted | in dev | ready for testing | target version | 
 |------|------|------|------|-----|
 | handling HTTP response codes | :white_check_mark: | :white_check_mark: | :white_check_mark: | 0.1 / pre alpha |

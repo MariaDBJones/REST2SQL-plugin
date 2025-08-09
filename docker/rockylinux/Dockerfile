@@ -23,7 +23,7 @@ WORKDIR /opt
 ENV PATH="${PATH}:/opt"
 
 # setting the branch name we want to clone
-ENV GITBRANCH=GET
+ENV GITBRANCH=dev
 
 # creating basic config file & utility scripts for easy dev & test
 
@@ -31,15 +31,15 @@ ENV GITBRANCH=GET
 RUN printf "[mariadb]\nplugin-load-add=libjson2sql\nplugin_maturity=unknown\nskip-name-resolve\n" > /etc/load_jsonplugin.cnf
 
 # utilities
-RUN printf '#!/bin/bash\nmariadb -e '\''grant process, select on *.* to `api`@`localhost` identified by '\''passw0rd'\'''\''\n' > user
-RUN printf "#!/bin/bash \n cd /app \n git clone -b $GITBRANCH --single-branch --depth 1 https://github.com/MariaDBJones/json2sql-plugin.git . \n mkdir build \n cd build \n cmake .. \n" > clone
+RUN printf "#!/bin/bash\nmariadb -e '\''grant process, select on *.* to `api`@`localhost` identified by '\''passw0rd'\'''\''\n" > user
+RUN printf "#!/bin/bash \n cd /app \ngit clone -b \"${1:-$GITBRANCH}\" --single-branch --depth 1 https://github.com/MariaDBJones/json2sql-plugin.git . \nmkdir build \ncd build \n cmake .. \n" > clone
 RUN printf "#!/bin/bash \n cd /app/build \n cmake --build . --verbose \n" > build
 RUN printf "#!/bin/bash \n cp -f /app/plugin/libjson2sql.so /usr/lib64/mysql/plugin/ \n mariadbd-safe --defaults-extra-file=/etc/load_jsonplugin.cnf & && grep plugin /var/lib/mysql/*.err" > deploy
 RUN printf "#!/bin/bash \n mariadb -e 'shutdown;' \n rm -f /usr/lib64/mysql/plugin/libjson2sql.so \n rm -f /app/plugin/libjson2sql.so \n" > clean
 
 # test scripts
-RUN printf "#!/bin/bash \n curl -w {'%{http_code}..%{content_type}\n' -X GET http://127.0.0.1:3000/v1/status" > status
-RUN printf "#!/bin/bash \n curl -w {'%{http_code}..%{content_type}\n' -X GET http://127.0.0.1:3000/v1/ping" > pingz
+RUN printf "#!/bin/bash \n curl -i -X GET http://127.0.0.1:3000/v1/status" > status
+RUN printf "#!/bin/bash \n curl -i -X GET http://127.0.0.1:3000/v1/ping" > pingz
 
 # # Set the working directory to /app
 WORKDIR /app

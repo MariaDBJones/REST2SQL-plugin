@@ -97,9 +97,9 @@ static int request_handler(void *cls, struct MHD_Connection *connection,
 //  } else if (strcmp(method, "PUT") == 0) {
 // CALL
 //        response = handle_put_request(url, upload_data, upload_data_size);
-//  } else if (strcmp(method, "DELETE") == 0) {
+    } else if (strcmp(method, "DELETE") == 0) {
 // DELETE
-//        response = handle_delete_request(url);
+        response = handle_delete_request(url);
     } else {
 // Method not supported
           cJSON_AddStringToObject(response, "status", "METHODNOTALLOWED");
@@ -112,7 +112,7 @@ static int request_handler(void *cls, struct MHD_Connection *connection,
 // clean exit procedure w/ housekeeping
     int ret = send_json_response(connection, response);
 // Free the allocated JSON string
-    free(response); // Free the allocated JSON string
+    free(response); 
 // Nettoyage avant sortie du thread
     mysql_thread_end();
 

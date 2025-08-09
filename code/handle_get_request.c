@@ -73,6 +73,7 @@ cJSON* handle_get_request(const char *url) {
 // 2. analyzing tokens to match patterns and resources
 // 3 possibilites :
 // - resource in (ping, status) && 2 tokens
+// - resource = status && 3 tokens
 // - resource = structure && 4 tokens
 // - resource = data && 6 tokens
 // - bad request format
@@ -87,7 +88,12 @@ cJSON* handle_get_request(const char *url) {
 // STATUS
         snprintf(query, sizeof(query), "SHOW GLOBAL STATUS");
         cJSON_AddStringToObject(json_response, "SQL", query);
-
+        
+    } else if (strcasecmp(resource, "status") == 0 && nb_tokens == 3) {
+// STATUS LIKE
+        snprintf(query, sizeof(query), "SHOW GLOBAL STATUS like '%%%s%%'", schema);
+        cJSON_AddStringToObject(json_response, "SQL", query);
+        
     } else if (strcasecmp(resource, "struct") == 0 && nb_tokens == 4) {
 // STRUCTURE
         snprintf(query, sizeof(query), "SHOW COLUMNS FROM %s.%s", schema, table);

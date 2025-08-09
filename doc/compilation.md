@@ -1,15 +1,16 @@
 ## To compile, install and launch your MariaDB plugin as an external library without compiling the entire MariaDB server, follow these steps:
 
-* download [Dockerfile](https://github.com/SylvainA77/JSON2SQL-plugin/blob/main/docker/rockylinux/Dockerfile) 
-* build once : docker build --no-cache -t json2sql:latest .   
+* download [Dockerfile](https://github.com/SylvainA77/REST2SQL-plugin/blob/dev/docker/rockylinux/Dockerfile) 
+* build once : docker build --no-cache -t rest2sql:latest .   
   *  Container is built with all the tools and scripts
   *  check env variables in case you want to change the cloned branch  
-* run many : docker run -it json2sql
+* run many : docker run -it rest2sql
   * make the command exeuctables : chmod +x /opt/*  
-  *  To clone a branch in /app : clone
+  *  To clone a branch in /app : clone dev||main (argument is optional : default = dev)
   *  To build in /app/plugin : build
   *  To deploy the lib from /app/plugin and start mariadb daemon : deploy
-  *  To test ${resource} : call ${resource}
+  *  To test ping : curl -i http://127.0.0.1:3000/v1/ping or simply pingz
+  *  To test status : curl -i http://127.0.0.1:3000/v1/status or simply status
   *  To cleanup for a new build : clean  
 
 ## Sources :  
