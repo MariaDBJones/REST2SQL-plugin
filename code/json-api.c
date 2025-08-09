@@ -127,8 +127,42 @@ static int rest_api_plugin_init(void *p) {
        fprintf(stderr, "Failed to initialize mariadb lib\n");
         return 2;
     }
+// recreate api user if need be
+// 1. check api@localhost existence
+    MYSQL *admin;
 
-//default behaviour : bind to local address
+    admin = mysql_init(NULL);
+    if (mysql_real_connect_local(admin) == NULL) {
+        fprintf(stderr, "Error %d returned. %s", mysql_errno(admin));
+        return 1;
+    }
+
+    if (mysql_real_query(admin, STRING_WITH_STRLEN("select 1 from mysql.user where user='api' and host ='localhost'"))) {
+        fprintf(stderr, "Error %d returned. %s", mysql_errno(admin));
+        mysql_close(admin);
+        return 2;
+    }
+// 2. if does not exist : recreate
+    MYSQL_RES *result = mysql_store_result(admin);
+    if(result == NULL) {    
+        fprintf(stderr, "Error %d returned. %s", mysql_errno(admin));
+        mysql_close(admin);
+        return 2;
+    }
+    if( mysql_num_rows(result) == 0) {
+        mysql_free_result(result);
+         // Use snprintf to construct the SQL statement safely
+         snprintf(grantuser, sizeof(grantuser), "GRANT process, select ON *.* TO `%s`@`localhost` IDENTIFIED BY '%s';", 
+             USER, PASSWORD);
+        if (mysql_real_query(admin, STRING_WITH_STRLEN(grantuser))) {
+            fprintf(stderr, "Error %d returned. %s", mysql_errno(admin));
+            mysql_close(admin);
+            return 2;
+        }  
+        mysql_close(admin);
+    };
+    
+//binding to ADDRESS:PORT
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(struct sockaddr_in));
     addr.sin_family = AF_INET;
@@ -140,7 +174,7 @@ static int rest_api_plugin_init(void *p) {
                                 NULL, NULL,
                                 &request_handler,                  // answering function
                                 NULL,
-                                MHD_OPTION_SOCK_ADDR, &addr,       // bind address
+                                MHD_OPTION_SOCK_ADDR, &addr,       // bind ADDRESS
  //                               MHD_OPTION_THREAD_POOL_SIZE, 5,    // max number of concurrent threads
                                 MHD_OPTION_END);
 
