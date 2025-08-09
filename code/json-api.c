@@ -136,12 +136,19 @@ static int rest_api_plugin_init(void *p) {
         fprintf(stderr, "Error %d returned. %s", mysql_errno(admin));
         return 1;
     }
-
-    if (mysql_real_query(admin, STRING_WITH_STRLEN("select 1 from mysql.user where user='api' and host ='localhost'"))) {
+    int size = snprintf(NULL, 0, "select 1 from mysql.user where user='%s' and host ='localhost'", 
+             USER);
+    size_t checksize = (size_t)size + 1;
+    char *checkuser = (char *)malloc(checksize);
+    snprintf(checkuser, checksize, "select 1 from mysql.user where user='%s' and host ='localhost'", 
+             USER);
+    if (mysql_real_query(admin, STRING_WITH_STRLEN(checkuser))) {
         fprintf(stderr, "Error %d returned. %s", mysql_errno(admin));
+        free(checkuser);
         mysql_close(admin);
         return 2;
     }
+    free(checkuser);
 // 2. if does not exist : recreate
     MYSQL_RES *result = mysql_store_result(admin);
     if(result == NULL) {    
@@ -151,16 +158,23 @@ static int rest_api_plugin_init(void *p) {
     }
     if( mysql_num_rows(result) == 0) {
         mysql_free_result(result);
-         // Use snprintf to construct the SQL statement safely
-         snprintf(grantuser, sizeof(grantuser), "GRANT process, select ON *.* TO `%s`@`localhost` IDENTIFIED BY '%s';", 
+// Use snprintf to construct the SQL statement safely
+        int size = snprintf(NULL, 0, "GRANT process, select ON *.* TO `%s`@`localhost` IDENTIFIED BY '%s'", 
+             USER, PASSWORD);
+        size_t grantsize = (size_t)size + 1;
+        char *grantuser = (char *)malloc(grantsize);
+         snprintf(grantuser, grantsize, "GRANT process, select ON *.* TO `%s`@`localhost` IDENTIFIED BY '%s'", 
              USER, PASSWORD);
         if (mysql_real_query(admin, STRING_WITH_STRLEN(grantuser))) {
             fprintf(stderr, "Error %d returned. %s", mysql_errno(admin));
             mysql_close(admin);
+            free(grantuser);
             return 2;
         }  
-        mysql_close(admin);
+        free(grantuser);
     };
+    mysq_free_result(result);
+    mysql_close(admin);
     
 //binding to ADDRESS:PORT
     struct sockaddr_in addr;
