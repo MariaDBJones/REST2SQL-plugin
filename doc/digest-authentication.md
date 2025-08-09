@@ -77,6 +77,6 @@ HA2 = SHA256("GET:/v1/login")
 expected_response = SHA256(HA1 : nonce : nc : cnonce : qop : HA2)
 ```
 3. Compare `expected_response` with the `response` from client:
-   - If match → authentication success.
+   - If match → authentication success proceed [here](session-jwt.md)
    - Else → respond with 401 Unauthorized.
 
