@@ -9,9 +9,11 @@
 | handling DELETE/DELETE | :white_check_mark: | :white_check_mark: | :white_large_square: | 0.2 / pre alpha |
 | status resource extension | :white_check_mark: | :white_check_mark: | :white_large_square: | 0.2 / pre alpha |
 | securing the API with HTTPS | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
+| login resource | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
+| digest authentication | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
 | ability to subscribe to resources | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
 | linking subscription to a mrdb role | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
-| handling credentials with JWT (lib to be choosen) | :grey_question: | :white_large_square: | :white_large_square: | 0.5 pre alpha  |
+| credentials + session like behaviour with JWT (lib to be choosen) | :grey_question: | :white_large_square: | :white_large_square: | 0.5 pre alpha  |
 | handling POST/INSERT | :white_check_mark: | :white_large_square: | :white_large_square: | 0.6 / pre alpha |
 | handling PATCH/UPDATE | :white_check_mark: | :white_large_square: | :white_large_square: | 0.6 / pre alpha | 
 | add status variables : have_json2sql, counters | :white_check_mark: | :white_large_square: | :white_large_square: | 0.7 / alpha |
