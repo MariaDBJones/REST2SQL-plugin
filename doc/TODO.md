@@ -13,13 +13,15 @@
 | securing the API with HTTPS | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.3 / pre alpha |
 | ability to subscribe to resources | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.4 / pre alpha |
 | linking subscription to a mrdb role | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.4 / pre alpha |
-| handling credentials with JWT (lib to be choosen) | :grey_question: | :white_large_square: | :white_large_square: | | 0.5 pre alpha  |
+| handling Authorization with JWT (lib to be choosen) | :grey_question: | :white_large_square: | :white_large_square: | | 0.5 pre alpha  |
 | handling POST/INSERT | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.6 / pre alpha |
 | handling PATCH/UPDATE | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.6 / pre alpha | 
 | add status variables : have_json2sql, counters | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.7 / alpha |
+| request rate limiting | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.7 / alpha | 
 | add system variables : address, port, resource exposition list | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.8 / alpha | 
 | input sanitation | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.9 / beta |
 | memory management hardening | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.9 / beta |
+| header/CSRF security check | :white_check_mark: | :white_large_square: | :white_large_square: | | 0.9 / beta |
 | handling simple sort order | :grey_question: | :grey_question: | :grey_question: | :grey_question: | necessary :grey_question: |
 | handling UPSERTS | :grey_question: | :grey_question: | :grey_question: | :grey_question: | is it CRUD :grey_question: | 
 | handling PUT/CALL stored procedure | :grey_question: | :grey_question: | :grey_question: | :grey_question: |  is it CRUD :grey_question: | 
