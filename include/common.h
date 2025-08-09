@@ -82,7 +82,10 @@
 // TODO : managing this via system variables
 #define PORT 3000
 #define ADDRESS "0.0.0.0"
-#define APIUSER "api"
+
+// TODO : obfuscate
+#define APIUSER "restapiplugin"
+#define APIPASSWORD "rA9$Gx2!kF6oW&uP"
 
 #define DEBUG  1
 
