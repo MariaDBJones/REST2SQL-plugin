@@ -12,12 +12,15 @@
 | checking/auto creating DB users at startup | :white_check_mark: | :white_large_square: | :white_large_square: | 0.2 / pre alpha |
 | use SQL service for authent/admin tasks |  :white_check_mark: | :white_large_square: | :white_large_square: | 0.2 / pre alpha |
 | securing the API with HTTPS | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
-| login resource | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
 | HTTP redirect (302) | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
+| rest2sql/digest table | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
+| rest2sql/login_history table | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
+| login resource | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
 | digest authentication | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
+| rest2sql/whitelist table (resource & method) | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
+| rest2sql/blacklist table (resource & method)  | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
 | ability to subscribe to resources | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
 | handling subscription as mrdb role | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
-| HTTP method black/whitelist | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
 | credentials + session like behaviour with JWT (lib to be choosen) | :white_check_mark: | :white_large_square: | :white_large_square: | 0.5 pre alpha  |
 | handling POST/INSERT | :white_check_mark: | :white_large_square: | :white_large_square: | 0.6 / pre alpha |
 | handling PATCH/UPDATE | :white_check_mark: | :white_large_square: | :white_large_square: | 0.6 / pre alpha | 
