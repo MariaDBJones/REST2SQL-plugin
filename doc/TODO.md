@@ -17,8 +17,8 @@
 | rest2sql/login_history table | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
 | login resource | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
 | digest authentication | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
-| rest2sql/whitelist table (resource & method) | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
-| rest2sql/blacklist table (resource & method)  | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
+| whitelist (resource & method) | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
+| blacklist (resource & method)  | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
 | ability to subscribe to resources | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
 | handling subscription as mrdb role | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
 | credentials + session like behaviour with JWT (lib to be choosen) | :white_check_mark: | :white_large_square: | :white_large_square: | 0.5 pre alpha  |
