@@ -1,6 +1,6 @@
-# PROCEDURES resource
+# ??? PROCEDURES resource ???
 
-A procedures resource represent a stored procedure in the database
+A procedures resource represent a stored procedure in the database: STILL TBD
 
 # Resource operations
 
