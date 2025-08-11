@@ -15,9 +15,11 @@ The goal is to provide an easy way to map http requests to CRUD-like DML stateme
 - **Last Updated**: 20250809
 - **Actual development branch** : dev
 
-## Direct tables access
+## R(ead) Methods
 
-* [GET → SELECT/DESC](https://github.com/SylvainA77/JSON-API-plugin/blob/main/doc/handle_get_request.md)  
+* [GET → SELECT/DESC/LOGIN/STATUS](https://github.com/SylvainA77/JSON-API-plugin/blob/main/doc/handle_get_request.md)
+
+## C(reate)U(pdate)D(elete) Methods
 
 * [POST → INSERT](https://github.com/SylvainA77/JSON2SQL-plugin/blob/main/doc/handle_post_request.md)  
 
@@ -34,7 +36,7 @@ The goal is to provide an easy way to map http requests to CRUD-like DML stateme
 
 * [instructions](https://github.com/SylvainA77/JSON-API-plugin/blob/main/doc/compilation.md)
 
-## upcoming features
+## upcoming features and releases
 
 * [TODO](https://github.com/SylvainA77/JSON-API-plugin/blob/main/doc/TODO.md)
 
