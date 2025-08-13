@@ -29,6 +29,7 @@
 | using system variables : address, port, resource exposition list, http method black/whitelist, session duration | :white_check_mark: | :white_large_square: | :white_large_square: | 0.8 / alpha |
 | input sanitation | :white_check_mark: | :white_large_square: | :white_large_square: | beta |
 | memory management hardening | :white_check_mark: | :white_large_square: | :white_large_square: | beta |
+| exposing binlog resources | :grey_question: | :grey_question: | :grey_question: | :grey_question: |
 | handling UPSERTS | :grey_question: | :grey_question: | :grey_question: | :grey_question: |
 | handling simple sort order | :grey_question: | :grey_question: | :grey_question: | :grey_question: | :grey_question: |
 | handling PUT/CALL stored procedure | :grey_question: | :grey_question: | :grey_question: |  :grey_question: | :grey_question:
