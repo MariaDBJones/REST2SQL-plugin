@@ -46,6 +46,6 @@ Documentation sits in [doc folder](./doc)
 ## Contributions
 
 * [Awesome people](https://github.com/SylvainA77/JSON-API-plugin/blob/main/Contributions.md)
-* If you want to contribute, please take a look at branches. The development branch is announced in the project status. There will be one per http method to handle with corresponding name.
+* If you want to contribute, please take a look at branches. The development branch is announced in the project status.
 
 
