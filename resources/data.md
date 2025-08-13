@@ -1,6 +1,6 @@
 # DATA resource
 
-An authenticated resource reading/writing datas of a table in the database
+An authenticated resource reading datas of a table in the database
 
 # Resource operations
 
