@@ -19,6 +19,9 @@ The goal is to provide an easy way to map http requests to CRUD-like DML stateme
 
 This project is based on MariaDB 11.4 (both CS or ES). Earlier versions are not compatible as it makes use of several functions introduced between 10.10 and 11.3.
 
+## Project documentation
+Documentation sits in [doc folder](./doc) 
+
 ## R(ead) Methods
 
 * [GET → SELECT/DESC/LOGIN/STATUS](https://github.com/SylvainA77/JSON-API-plugin/blob/main/doc/handle_get_request.md)
