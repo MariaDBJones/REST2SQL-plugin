@@ -1,6 +1,6 @@
 # STRUCTURE resource
 
-A stracture resource represent the structure of a table in the database
+A authenticated resource reading the structure of a table in the database
 
 # Resource operations
 
