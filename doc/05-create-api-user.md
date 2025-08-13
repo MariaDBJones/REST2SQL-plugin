@@ -45,4 +45,4 @@ END IF;
 
 | userid | login | hashedPassword | salt | created_at | role | 
 |----|----|----|----|----|----|
-| uuid_short() INT UNSIGNED not null KEY | varchar(20) not null | varbinary(64) not null | varbinary(16) not null | datetime |   as (concat('r', user) virtual |
+| uuid_short() INT UNSIGNED not null KEY | varchar(20) not null | varbinary(32) not null | varbinary(16) not null | datetime |   as (concat('r', user) virtual |
