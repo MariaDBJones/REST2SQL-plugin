@@ -9,8 +9,8 @@ stored proc : createUser
 ## algorithm
 1. check user does not exists
 2. check password strength : between 10 and 20chars, 1 lowercase, 1 uppercase, 1 numeric & 1 special char amongst $_*-!/#@
-3. create salt with cryptographioc secure RANDOM_BYTES
-4. hash password + salt with safe for password hashing KDF
+3. create salt with cryptographic secure RANDOM_BYTES() (MRDB 10.10)
+4. hash password + salt with safe for password hashing KDF() (MRDB11.3)
 5. write user, hash & salt in table
 6. creates role name "r$user"
 7. allow APIUSER to assign role
