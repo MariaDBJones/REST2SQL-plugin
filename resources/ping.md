@@ -1,6 +1,6 @@
 # PING resource
 
-A ping resource 
+An unauthenticated ping resource 
 
 # Resource operations
 
