@@ -1,6 +1,6 @@
 # STATUS resource
 
-A status resource represent the global status variables in the database
+An authenticated status resource represent the global status variables in the database
 
 # Resource operations
 
