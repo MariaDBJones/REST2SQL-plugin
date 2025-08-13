@@ -15,6 +15,10 @@ The goal is to provide an easy way to map http requests to CRUD-like DML stateme
 - **Last Updated**: 20250809
 - **Actual development branch** : dev
 
+## MariaDB version compatiblity
+
+This project is based on MariaDB 11.4 (both CS or ES). Earlier versions are not compatible as it makes use of several functions introduced between 10.10 and 11.3.
+
 ## R(ead) Methods
 
 * [GET → SELECT/DESC/LOGIN/STATUS](https://github.com/SylvainA77/JSON-API-plugin/blob/main/doc/handle_get_request.md)
@@ -27,10 +31,6 @@ The goal is to provide an easy way to map http requests to CRUD-like DML stateme
 
 * [DELETE → DELETE](https://github.com/SylvainA77/JSON2SQL-plugin/blob/main/doc/handle_delete_request.md)
 
-
-## Stored procedure calls (TBD)
-
-* [PUT → CALL](https://github.com/SylvainA77/JSON2SQL-plugin/blob/main/doc/handle_put_request.md)
   
 ## compilation instructions
 
