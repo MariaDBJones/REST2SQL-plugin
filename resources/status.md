@@ -10,3 +10,10 @@ GET /v1/status/
 ```
 
 ### Response
+
+## Read only one status variable
+```
+GET /v1/status/$variableName
+```
+
+### Response
