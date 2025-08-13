@@ -4,7 +4,7 @@ An unauthenticated ping resource
 
 # Resource operations
 
-## Read the operational
+## Read the operational status
 ```
 GET /v1/ping
 ```
