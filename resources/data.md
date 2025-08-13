@@ -1,6 +1,6 @@
 # DATA resource
 
-A data resource represent the content of a table in the database
+An auithenticated resource reading datas of a table in the database
 
 # Resource operations
 
