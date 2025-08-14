@@ -158,5 +158,5 @@ Here we discuss the various choices made during implementation of this API
   * Documentation and Community Support: Well-documented with examples, facilitating ease of use.
 * Use Case: Suitable for applications that require robust JWT handling with flexibility in implementation.
 ### Decision
-* TBD
-  * Why : 
+* jwt-c
+  * Why : rest2sql is the only issuer & verifier, so no need for private/public keypair and ECDSA-like asymmetric algorithms. also server key is reclaculated at every restart, so lightweight + HMAC256 fels like a great choice.
