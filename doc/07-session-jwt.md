@@ -1,3 +1,9 @@
+# session management
+
+a session JWT is issued as part of the response to a succesfull digest login
+
+## issuing the JWT (server side)
+
 1. **Header** — JSON object specifying token type and signing algorithm, e.g.:
    ```json
    {
@@ -14,60 +20,96 @@
    - `exp`: Expiration timestamp
    - Any other custom user or session claims (e.g., roles, permissions)
 
+Summary Table
+| Claim	| Purpose	| Your Usage Example	| Notes | 
+|---|---|---|---|
+|sub	|User identifier (login or ID)	|"sub": "johndoe"	|Unique user ID or username|
+|iss	|Token issuer (the API or auth server)	|"iss": "rest2sql.hostname.com"	|Validates authority|
+|aud	|Intended recipient(s) (API/service name)	|"aud": "rest2sql.hostname.com"	|Distinguishes token target|
+|iat	|Token issue time (epoch timestamp)	|"iat": 1692057240	|Marks token creation time|
+|exp	|Token expiration time (epoch timestamp)	|"exp": 1692060840	|Token expiry enforcement|
+|scope	|User’s assigned roles or permissions	|"roles": ["reader", "editor"]	|Used for authorization checks|
+
 3. **Signature** — the cryptographic signature created by signing the Base64Url-encoded header and payload with your secret key using the algorithm from the header.
 
 ***
 
 ### Pseudocode steps to compose a JWT after successful authentication:
 
-```pseudo
-// 1. Prepare the JWT header (typically a fixed JSON object)
-header = {
-  "typ": "JWT",
-  "alg": "HS256"   // or another supported algorithm like RS256
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include "jwt.h"    // from jwt-c
+#include "cJSON.h"  // from cJSON
+
+// Configurable values:
+static const char *jwt_secret = "your-256-bit-secret"; // Replace with generated secret
+static const char *jwt_issuer = "rest2sql.server";
+static const char *jwt_audience = "rest2sql.server";
+static const int jwt_ttl_seconds = 3600; // 1 hour
+
+cJSON* issue_jwt(const char *login) {
+    time_t now = time(NULL);
+
+    // 1. Build cJSON payload object
+    cJSON *payload_obj = cJSON_CreateObject();
+    cJSON_AddStringToObject(payload_obj, "sub", login);
+    cJSON_AddStringToObject(payload_obj, "iss", jwt_issuer);
+    cJSON_AddStringToObject(payload_obj, "aud", jwt_audience);
+    cJSON_AddNumberToObject(payload_obj, "iat", (double)now);
+    cJSON_AddNumberToObject(payload_obj, "exp", (double)(now + jwt_ttl_seconds));
+
+    // Optional custom claims
+    cJSON *roles_arr = cJSON_CreateArray();
+    cJSON_AddItemToArray(roles_arr, cJSON_CreateString("admin"));
+    cJSON_AddItemToObject(payload_obj, "roles", roles_arr);
+
+    // 2. Convert payload JSON to string
+    char *payload_str = cJSON_PrintUnformatted(payload_obj);
+
+    // 3. Encode (sign) JWT with HS256
+    char token[1024];
+    if (jwt_encode_hmac_sha256(payload_str, jwt_secret, token, sizeof(token)) != 0) {
+        fprintf(stderr, "Failed to create JWT\n");
+        free(payload_str);
+        cJSON_Delete(payload_obj);
+        return NULL;
+    }
+
+    free(payload_str);
+
+    // 4. Create return object: { "token": "<jwt>" }
+    cJSON *result_obj = cJSON_CreateObject();
+    cJSON_AddStringToObject(result_obj, "token", token);
+
+    // The payload_obj isn't returned; only the token JSON goes out
+    cJSON_Delete(payload_obj);
+
+    return result_obj; // Caller must cJSON_Delete() when done
 }
 
-// 2. Prepare the payload (claims) with user info and metadata
-payload = {
-  "sub": "user_id_or_username",          // user identifier from your auth step
-  "iss": "your-api-name-or-url",         // issuer: your API or domain
-  "aud": "your-api-audience",            // intended audience of the token
-  "iat": current_unix_timestamp(),       // issued at (now)
-  "exp": current_unix_timestamp() + 3600 // expiration time (e.g. 1 hour later)
-  // additional claims like roles, permissions can also go here
-}
-
-// 3. Encode header and payload as Base64Url strings
-encodedHeader = Base64UrlEncode(JSON.stringify(header))
-encodedPayload = Base64UrlEncode(JSON.stringify(payload))
-
-// 4. Create the signature input string
-signingInput = encodedHeader + "." + encodedPayload
-
-// 5. Generate the signature using your secret key with the algorithm specified
-signature = HMAC_SHA256(secret_key, signingInput)  // if using HS256
-
-// 6. Base64Url encode the signature
-encodedSignature = Base64UrlEncode(signature)
-
-// 7. Concatenate all parts with dots
-jwtToken = encodedHeader + "." + encodedPayload + "." + encodedSignature
-
-// 8. Return/send this JWT token to the client for use in Authorization header
 ```
 
 ***
 
-### Usage on the client side
+## Using thee JWT (client side)
 The client includes the JWT in API requests like so:
 
 ```
-Authorization: Bearer 
+GET /v1/status HTTP/1.1
+Host: api.example.com
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqb2huZG9lIiwiaXNzIjoicmVzdDIxc3FsLmV4YW1wbGUuY29tIiwiYXVkIjoicmVzdDIxc3FsLmV4YW1wbGUuY29tIiwiaWF0IjoxNjk4MDEyMzAwLCJleHAiOjE2OTgwMTU5MDB9.XmFgLz1PiJwZpj0fJF29nNdk1PHCGw3s-3t4h6TGvbs
+User-Agent: MyApiClient/1.0
+Accept: application/json
+
 ```
 
 ***
 
-Pseudocode steps to verify a JWT
+## verifying a JWT (server side)
+
 
 1. **Decode the JWT** into its three parts: header, payload, and signature.
 
@@ -95,29 +137,69 @@ Pseudocode steps to verify a JWT
 ### Summary pseudocode for JWT verification:
 
 ```
-function verifyJWT(token, secretOrPublicKey, expectedIssuer, expectedAudience):
-    // 1. Split token into header, payload, signature
-    header, payload, signature = decodeJWTParts(token)
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
-    // 2. Verify signature with secret or public key using header.alg
-    if not verifySignature(header, payload, signature, secretOrPublicKey, header.alg):
-        return false
+#include "jwt.h"    // jwt-c
+#include "cJSON.h"  // cJSON
 
-    // 3. Parse payload (JSON) claims
-    claims = parseJSON(payload)
+// Configured secret used for signing and verifying JWTs (set accordingly)
+static const char *jwt_secret = "your-256-bit-secret";
 
-    // 4. Validate standard claims
-    if claims.iss != expectedIssuer:
-        return false
-    if claims.aud != expectedAudience:
-        return false
-    currentTime = now()
-    if claims.exp  currentTime:
-        return false
+int verifyJWT(cJSON* jwt_json) {
+    if (jwt_json == NULL) {
+        fprintf(stderr, "verifyJWT: input cJSON object is NULL\n");
+        return 0;
+    }
 
-    // 5. Additional checks if needed...
+    // Extract the JWT token string from the JSON object
+    const cJSON *token_item = cJSON_GetObjectItem(jwt_json, "token");
+    if (!cJSON_IsString(token_item) || token_item->valuestring == NULL) {
+        fprintf(stderr, "verifyJWT: No 'token' string found in cJSON object\n");
+        return 0;
+    }
+    const char *token = token_item->valuestring;
 
-    return true, claims
+    // Buffer to hold decoded payload (JSON string)
+    char payload_str[2048];  // Adjust size as needed
+
+    // Verify the JWT signature with HS256 and extract the payload string
+    if (jwt_decode_hmac_sha256(token, jwt_secret, payload_str, sizeof(payload_str)) != 0) {
+        fprintf(stderr, "verifyJWT: JWT signature verification failed\n");
+        return 0;
+    }
+
+    // Parse the payload JSON string
+    cJSON *payload_json = cJSON_Parse(payload_str);
+    if (payload_json == NULL) {
+        fprintf(stderr, "verifyJWT: Failed to parse JWT payload JSON\n");
+        return 0;
+    }
+
+    // Check 'exp' claim to ensure token is not expired
+    const cJSON *exp_item = cJSON_GetObjectItem(payload_json, "exp");
+    if (!cJSON_IsNumber(exp_item)) {
+        fprintf(stderr, "verifyJWT: 'exp' claim missing or invalid\n");
+        cJSON_Delete(payload_json);
+        return 0;
+    }
+
+    time_t now = time(NULL);
+    if ((time_t)exp_item->valuedouble <= now) {
+        fprintf(stderr, "verifyJWT: Token expired\n");
+        cJSON_Delete(payload_json);
+        return 0;
+    }
+
+    // Optionally, verify other claims here (iss, aud, nbf, etc.)
+
+    // Cleanup
+    cJSON_Delete(payload_json);
+
+    // Token verified and not
+    return 1;
 ```
 
 ***
@@ -131,25 +213,12 @@ function verifyJWT(token, secretOrPublicKey, expectedIssuer, expectedAudience):
 - Validate token expiration strictly to prevent reuse of old tokens.
 - Keep secret keys and private keys secure; distribute only public keys as needed.
 
-***
-
-This approach complements your digest authentication by verifying the stateless JWT tokens that clients present after logging in.
-
-If you want, I can provide example code or more detailed integration guidance for verifying JWT tokens in C or your preferred environment.
-
-Sources:  
-- [Cryptr JWT validation guide](https://www.cryptr.co/documentation/how-to-validate-jwt)[1]
-- [Criipto JWT validation step-by-step](https://www.criipto.com/blog/jwt-validation-guide)[2]
-- [Auth0 validate JWT](https://auth0.com/docs/secure/tokens/json-web-tokens/validate-json-web-tokens)[4]
-
 [1] https://www.cryptr.co/documentation/how-to-validate-jwt
 [2] https://www.criipto.com/blog/jwt-validation-guide
 [3] https://www.cryptr.co/documentation/fr/how-to-validate-jwt
 [4] https://auth0.com/docs/secure/tokens/json-web-tokens/validate-json-web-tokens
 [5] https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-verifying-a-jwt.html
-[6] https://jwt.io/introduction
 [7] https://docs.kinde.com/build/tokens/verifying-json-web-tokens/
-[8] https://jwt.io
 [9] https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/10-Testing_JSON_Web_Tokens
 [10] https://www.ibm.com/docs/en/api-connect/10.0.8_lts?topic=tutorials-tutorial-validate-json-web-token-jwt
 
@@ -160,6 +229,5 @@ Sources:
 [5] https://blog.stephane-robert.info/docs/developper/programmation/python/connexion-4/
 [6] https://auth0.com/fr/learn/json-web-tokens
 [7] https://fusionauth.io/articles/tokens/jwt-components-explained
-[8] https://www.youtube.com/watch?v=xfuIkI2C8-o
 [9] https://www.ekino.fr/publications/introduction-aux-json-web-tokens/
 [10] https://auth0.com/docs/secure/tokens/json-web-tokens/json-web-token-structure
