@@ -75,6 +75,10 @@
 #define PATCH  "UPDATE"
 #define DELETE "DELETE"
 
+// constants for http answers
+#define ALLOWED_METHODS "GET"
+#define CONTENT_TYPE_JSON "application/json"
+
 // ease the use of mysql_real_query
 #define STRING_WITH_LEN(X) (X), ((size_t) (sizeof(X) - 1))
 #define STRING_WITH_STRLEN(X) (X), (strlen(X))
