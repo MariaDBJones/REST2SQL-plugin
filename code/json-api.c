@@ -29,50 +29,44 @@ struct MHD_Daemon *listener = NULL;
 
 // sends back HTTP + json to client
 static int send_json_response(struct MHD_Connection *connection, cJSON *json_response) {
-    char *response_string;
     int httpcode = HTTP_OK;
 
-// Convert the cJSON object to a JSON string
-    response_string = cJSON_Print(json_response);
+    // Extract HTTP code directly from JSON
+    cJSON *field = cJSON_GetObjectItemCaseSensitive(json_response, "httpcode");
+    if (cJSON_IsNumber(field)) {
+        httpcode = field->valueint;
+    }
 
-// If conversion fails, set an error message
-    if (response_string == NULL) {
-        response_string = strdup("{\"error\": \"Internal Server Error\", \"httpcode\": HTTP_INTERNAL_SERVER_ERROR }");
+    // Serialize JSON
+    char *json_str = cJSON_PrintUnformatted(json_response);
+    if (!json_str) {
         httpcode = HTTP_INTERNAL_SERVER_ERROR;
-    } else {
-        // Extract HTTP return code from the JSON string
-        cJSON *parsed_json = cJSON_Parse(response_string);
-        if (parsed_json) {
-            cJSON *field = cJSON_GetObjectItemCaseSensitive(parsed_json, "httpcode");
-            if (cJSON_IsNumber(field)) {
-                httpcode = field->valueint;
-            }
-            cJSON_Delete(parsed_json);
+        if (asprintf(&json_str, "{\"error\":\"Internal Server Error\",\"httpcode\":%d}", httpcode) < 0) {
+            return MHD_NO; // memory allocation failed
         }
     }
 
-// Create a response from the string
+    // Create HTTP response
     struct MHD_Response *mhd_response = MHD_create_response_from_buffer(
-        strlen(response_string),
-        (void *)response_string,
+        strlen(json_str),
+        (void *)json_str,
         MHD_RESPMEM_MUST_COPY
     );
-
-    if (mhd_response == NULL) {
-        free(response_string);
+    if (!mhd_response) {
+        free(json_str);
         return MHD_NO;
     }
 
-// Mandatory Allow header for HTTP 405 : added to all foir simplicity
-    MHD_add_response_header(mhd_response, MHD_HTTP_HEADER_ALLOW, "GET, POST, PUT, PATCH, DELETE");
-// content-type header  because all answer is json
-    MHD_add_response_header(mhd_response, "Content-Type", "application/json");
-    int ret = MHD_queue_response(connection, httpcode, mhd_response);
-    MHD_destroy_response(mhd_response);
-    free(response_string);
+    MHD_add_response_header(mhd_response, MHD_HTTP_HEADER_ALLOW, HTTP_ALLOWED_METHODS);
+    MHD_add_response_header(mhd_response, "Content-Type", CONTENT_TYPE_JSON);
 
+    int ret = MHD_queue_response(connection, httpcode, mhd_response);
+
+    MHD_destroy_response(mhd_response);
+    free(json_str);
     return ret;
 }
+
 
 // directing requests to the right handling function
 static int request_handler(void *cls, struct MHD_Connection *connection,
