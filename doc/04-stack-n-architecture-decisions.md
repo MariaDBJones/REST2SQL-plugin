@@ -9,7 +9,7 @@ Here we discuss the various choices made during implementation of this API
   * Security: Benefits from the security context of the database server, allowing for controlled access to sensitive operations.
   * Complexity: Requires knowledge of MariaDB's plugin architecture and may involve more complex development and maintenance processes.
 * Use Case: Ideal for scenarios where tight integration with the database is necessary, such as custom data processing or when needing to handle complex SQL operations directly.
-### MaxScale
+### MaxScale Plugin
 * Design Philosophy: MaxScale is a database proxy that provides advanced routing, load balancing, and monitoring capabilities between client applications and MariaDB servers.
 * Features:
   * Routing Capabilities: Can intelligently route requests based on defined rules, making it suitable for handling JSON requests and forwarding them to the appropriate backend databases.
@@ -27,7 +27,7 @@ Here we discuss the various choices made during implementation of this API
 * Use Case: Ideal for applications that require complex business logic not easily implemented as a plugin or when integrating with other services (e.g., web applications) that need to handle JSON.
 ### Decision : 
 * MariaDB plugin
-  * Why : it has been designed as an easy & simple way to consume datas in a single database. so integrating tightly with thze database, allows for the best performance
+  * Why : it has been designed as an easy & simple way to consume datas in a single database. So integrating tightly with the database, allows for the best performance
 
 ## C vs Go vs RUST vs js
 ### C
