@@ -1,42 +1,37 @@
 # List of identified & needed features
 
-| feature | accepted | in dev | ready for testing | target version | 
-|------|------|------|------|-----|
-| handling HTTP response codes | :white_check_mark: | :white_check_mark: | :white_check_mark: | 0.1 / pre alpha |
-| handling GET/SELECT | :white_check_mark: | :white_check_mark: | :white_check_mark: | 0.1 / pre alpha |
-| status resource | :white_check_mark: | :white_check_mark: | :white_check_mark: | 0.1 / pre alpha |
-| healthcheck resource  | :white_check_mark: | :white_check_mark: | :red_square: | replaced by ping |
-| ping resource | :white_check_mark: | :white_check_mark: | :white_check_mark: | 0.1 / pre alpha |
-| handling DELETE/DELETE | :white_check_mark: | :white_check_mark: | :white_large_square: | 0.2 / pre alpha |
-| status resource extension | :white_check_mark: | :white_check_mark: | :white_large_square: | 0.2 / pre alpha |
-| checking/auto creating DB users at startup | :white_check_mark: | :white_large_square: | :white_large_square: | 0.2 / pre alpha |
-| use SQL service for authent/admin tasks |  :white_check_mark: | :white_large_square: | :white_large_square: | 0.2 / pre alpha |
-| securing the API with HTTPS | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
-| HTTP redirect (302) | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
-| rest2sql/digest table | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
-| rest2sql/login_history table | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
-| login resource | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
-| digest authentication | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |
-| whitelist (resource & method) | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
-| blacklist (resource & method)  | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
-| ability to subscribe to resources | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
-| handling subscription as mrdb role | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |
-| credentials + session like behaviour with JWT (lib to be choosen) | :white_check_mark: | :white_large_square: | :white_large_square: | 0.5 pre alpha  |
-| handling POST/INSERT | :white_check_mark: | :white_large_square: | :white_large_square: | 0.6 / pre alpha |
-| handling PATCH/UPDATE | :white_check_mark: | :white_large_square: | :white_large_square: | 0.6 / pre alpha | 
-| add status variables : has_rest2sql, various counters | :white_check_mark: | :white_large_square: | :white_large_square: | 0.7 / alpha |
-| add system variables : address, port, resource exposition list, http method black/whitelist, session duration | :white_check_mark: | :white_large_square: | :white_large_square: | 0.7 / alpha |
-| using system variables : address, port, resource exposition list, http method black/whitelist, session duration | :white_check_mark: | :white_large_square: | :white_large_square: | 0.8 / alpha |
-| input sanitation | :white_check_mark: | :white_large_square: | :white_large_square: | beta |
-| memory management hardening | :white_check_mark: | :white_large_square: | :white_large_square: | beta |
-| exposing binlog resources | :grey_question: | :grey_question: | :grey_question: | :grey_question: |
-| handling UPSERTS | :grey_question: | :grey_question: | :grey_question: | :grey_question: |
-| handling simple sort order | :grey_question: | :grey_question: | :grey_question: | :grey_question: | :grey_question: |
-| handling PUT/CALL stored procedure | :grey_question: | :grey_question: | :grey_question: |  :grey_question: | :grey_question:
-| handling DDL | :red_square: | || not CRUD |
-| handling DCL | :red_square: | || no administrative task through CRUD REST |
-| handling TCL | :red_square: | || no trx in CRUD |
-| resource discovery  | :red_square: |  |  | unwise for security | 
-| handling simple joins for select | :red_square: |  || CRUD has no joins |
-| using global/local internal connexion | :red_square: | | | not allowing RBAC |
-| handling mutli-lines INSERTs | :red_square: |  |  | too complicated |
+| feature | accepted | in dev | ready for testing | target version | available |
+|------|------|------|------|-----|-----|
+| handling HTTP response codes | :white_check_mark: | :white_check_mark: | :white_check_mark: | 0.1 / pre alpha | :white_check_mark: |
+| handling GET/SELECT | :white_check_mark: | :white_check_mark: | :white_check_mark: | 0.1 / pre alpha | :white_check_mark: |
+| status resource | :white_check_mark: | :white_check_mark: | :white_check_mark: | 0.1 / pre alpha | :white_check_mark: |
+| healthcheck resource  | :white_check_mark: | :white_check_mark: | :red_square: | replaced by ping | :red_square: |
+| ping resource | :white_check_mark: | :white_check_mark: | :white_check_mark: | 0.1 / pre alpha | :white_check_mark: |
+| status resource extension | :white_check_mark: | :white_check_mark: | :white_large_square: | 0.2 / pre beta |:white_large_square: |
+| securing the API with HTTPS | :white_check_mark: | :white_large_square: | :white_large_square: | 0.2 / pre beta |:white_large_square: |
+| login resource | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |:white_large_square: |
+| digest authentication | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |:white_large_square: |
+| ability to subscribe to resources | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |:white_large_square: |
+| linking subscription to a mrdb role | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |:white_large_square: |
+| default hidden schemas : mysql, rest2sql | :white_check_mark: | :white_large_square: | :white_large_square: | 0.5 / pre alpha |:white_large_square: |
+| credentials + session like behaviour with libjwt-c | :white_check_mark: | :white_large_square: | :white_large_square: | 0.6 pre alpha  |:white_large_square: |
+| add status variables : have_json2sql, counters | :white_check_mark: | :white_large_square: | :white_large_square: | 0.7 / alpha |:white_large_square: |
+| add system variables : address, port, etc | :white_check_mark: | :white_large_square: | :white_large_square: | 0.8 / alpha | :white_large_square: |
+| input sanitation | :white_check_mark: | :white_large_square: | :white_large_square: | 0.9 / beta |:white_large_square: |
+| memory management hardening | :white_check_mark: | :white_large_square: | :white_large_square: | 0.9 / beta |:white_large_square: |
+| release | :white_check_mark: | :white_large_square: | :white_large_square: | 1.0 |:white_large_square: |
+| resource exposition black/whitelist | :white_check_mark: | :white_large_square: | :white_large_square: | 1.1 |:white_large_square: |
+| handling POST/INSERT | :white_check_mark: | :white_large_square: | :white_large_square: | 1.2 |:white_large_square: |
+| handling PATCH/UPDATE | :white_check_mark: | :white_large_square: | :white_large_square: | 1.3 | :white_large_square: |
+| handling DELETE/DELETE | :white_check_mark: | :white_check_mark: | :white_large_square: | 1.4  |:white_large_square: |
+| handling UPSERTS | :grey_question: | :grey_question: | :grey_question: | :grey_question: | :grey_question: |
+| handling simple sort order | :grey_question: | :grey_question: | :grey_question: | :grey_question: | :grey_question: | :grey_question: |
+| handling simple joins for select | :red_square: | | | NO (CRUD) | :red_square: |
+| handling PUT/CALL SP | :red_square: | | | NO (CRUD) | :red_square: |
+| handling DDL | :red_square: | | | NO (CRUD) | :red_square: |
+| handling DCL | :red_square: | | | NO (security) | :red_square: |
+| handling TCL | :red_square: | | | NO (CRUD) | :red_square: |
+| resource discovery  | :red_square: |  |  | NO (security) |  :red_square: |
+| using global/local internal connexion | :red_square: | | | NO (security) | :red_square: |
+| handling mutli-lines INSERTs | :red_square: |  |  | NO (CRUD) | :red_square: |
+
