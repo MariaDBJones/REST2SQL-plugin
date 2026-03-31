@@ -88,8 +88,9 @@
 #define ADDRESS "0.0.0.0"
 
 // TODO : obfuscate
-#define APIUSER "restapiplugin"
-#define APIPASSWORD "rA9$Gx2!kF6oW&uP"
+#define DEFAULTAPIUSER "restapi-user"
+#define DEFAULTAPIPASSWORD "re$t2SQ!"
+#define APIGROUP "rest2sql"
 
 #define DEBUG  1
 
