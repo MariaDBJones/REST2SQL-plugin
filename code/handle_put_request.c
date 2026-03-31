@@ -9,7 +9,11 @@ cJSON *handle_put_request(const char *url,
     cJSON *r = cJSON_CreateObject();
     if (r == NULL) return NULL;
     cJSON_AddStringToObject(r, "url", url ? url : "");
-    http_set_error(r, "PUT not available in this version",
+#if PUTMETHODCORK == 0
+    http_set_error(r, "PUT not available",
                    HTTP_METHOD_NOT_ALLOWED);
+#else
+        http_set_error(r, "PUT method disabled", HTTP_METHOD_NOT_ALLOWED);
+#endif
     return r;
 }
