@@ -69,4 +69,12 @@ void http_set_error(cJSON *json_response, const char *error_msg, int httpcode);
 int http_send_json_response(struct MHD_Connection *connection,
                             cJSON *json_response);
 
+int http_request_handler(void *cls,
+                            struct MHD_Connection *connection,
+                            const char *url,
+                            const char *method,
+                            const char *version,
+                            const char *upload_data,
+                            size_t *upload_data_size,
+                            void **con_cls);
 #endif /* HANDLE_HTTP_H */
