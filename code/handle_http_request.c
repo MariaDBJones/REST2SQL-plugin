@@ -80,3 +80,98 @@ int http_send_json_response(struct MHD_Connection *connection,
     free(json_str);
     return ret;
 }
+
+/* ============================================================
+ *  Request dispatcher
+ * ============================================================ */
+static int request_handler(void *cls,
+                            struct MHD_Connection *connection,
+                            const char *url,
+                            const char *method,
+                            const char *version,
+                            const char *upload_data,
+                            size_t *upload_data_size,
+                            void **con_cls)
+{
+    (void)cls;
+    (void)version;
+
+    cJSON *response = NULL;
+
+    /* Init MariaDB pour ce thread */
+    mysql_thread_init();
+ 
+#if HANDLERCORK == 0
+
+    if (strcmp(method, "GET") == 0) {
+#if GETMETHODCORK == 0
+        response = handle_get_request(url);
+#else
+        response = cJSON_CreateObject();
+        http_set_error(response, "GET method disabled", HTTP_METHOD_NOT_ALLOWED);
+#endif
+
+    } else if (strcmp(method, "POST") == 0) {
+#if POSTMETHODCORK == 0
+        response = handle_post_request(url, upload_data, upload_data_size);
+#else
+        response = cJSON_CreateObject();
+        http_set_error(response, "POST method disabled", HTTP_METHOD_NOT_ALLOWED);
+#endif
+
+    } else if (strcmp(method, "PATCH") == 0) {
+#if PATCHMETHODCORK == 0
+        response = handle_patch_request(url, upload_data, upload_data_size);
+#else
+        response = cJSON_CreateObject();
+        http_set_error(response, "PATCH method disabled", HTTP_METHOD_NOT_ALLOWED);
+#endif
+
+    } else if (strcmp(method, "PUT") == 0) {
+#if PUTMETHODCORK == 0
+        response = handle_put_request(url, upload_data, upload_data_size);
+#else
+        response = cJSON_CreateObject();
+        http_set_error(response, "PUT method disabled", HTTP_METHOD_NOT_ALLOWED);
+#endif
+
+    } else if (strcmp(method, "DELETE") == 0) {
+#if DELETEMETHODCORK == 0
+        response = handle_delete_request(url);
+#else
+        response = cJSON_CreateObject();
+        http_set_error(response, "DELETE method disabled", HTTP_METHOD_NOT_ALLOWED);
+#endif
+
+    } else {
+        response = cJSON_CreateObject();
+        cJSON_AddStringToObject(response, "method", method);
+        cJSON_AddStringToObject(response, "url",    url);
+        http_set_error(response, "Method not allowed", HTTP_METHOD_NOT_ALLOWED);
+    }
+
+#else
+    /* HANDLERCORK == 1 : plugin entier désactivé */
+    response = cJSON_CreateObject();
+    http_set_error(response, "Plugin disabled", HTTP_METHOD_NOT_ALLOWED);
+#endif
+
+    /* Garde-fou : si un handler retourne NULL (OOM), on répond 500 */
+    if (response == NULL) {
+        response = cJSON_CreateObject();
+        if (response != NULL)
+            http_set_error(response, "Internal Server Error",
+                           HTTP_INTERNAL_SERVER_ERROR);
+        else {
+            mysql_thread_end();
+            return MHD_NO;
+        }
+    }
+
+    int ret = http_send_json_response(connection, response);
+
+    cJSON_Delete(response);   /* cJSON_Delete, pas free() */
+    mysql_thread_end();
+
+    return ret;
+}
