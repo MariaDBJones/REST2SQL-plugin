@@ -312,6 +312,7 @@ static int rest_api_plugin_deinit(void *p)
 // sslca
 // sslcert
 // sslkey
+// default exposition : blacklist/whitelist
 // allow insert : PUTTMETHODCORK
 // allow update : PATCHMETHODCORK
 // allow delete : DELETEMETHODCORK
