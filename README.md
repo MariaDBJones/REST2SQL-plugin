@@ -8,11 +8,11 @@ The goal is to provide an easy way to map http requests to CRUD-like DML stateme
  
 ## Project Status
 
-- **Release**: pre ALPHA
+- **Release**: ALPHA
 - **Current Version**: 0.1
 - **dev version**: 0.2  
 - **Status**: Active development
-- **Last Updated**: 20250813
+- **Last Updated**: 20260331
 - **Actual development branch** : dev
 
 ## MariaDB version compatiblity
