@@ -88,8 +88,11 @@
 #define ADDRESS "0.0.0.0"
 
 // TODO : obfuscate
-#define DEFAULTAPIUSER "restapi-user"
-#define DEFAULTAPIPASSWORD "re$t2SQ!"
+// #define DEFAULTAPIUSER "restapi-user"
+// #define DEFAULTAPIPASSWORD "re$t2SQ!"
+// read variables from [rest2sql] group in cnf files
+// all variables will be prefixed with rest2sql :
+// rest2sql_user, rest2sql_password, rest2sql_
 #define APIGROUP "rest2sql"
 
 #define DEBUG  1
