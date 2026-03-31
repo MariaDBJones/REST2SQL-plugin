@@ -84,7 +84,7 @@ int http_send_json_response(struct MHD_Connection *connection,
 /* ============================================================
  *  Request dispatcher
  * ============================================================ */
-static int request_handler(void *cls,
+static int http_request_handler(void *cls,
                             struct MHD_Connection *connection,
                             const char *url,
                             const char *method,
