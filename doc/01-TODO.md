@@ -8,7 +8,7 @@
 | healthcheck resource  | :white_check_mark: | :white_check_mark: | :red_square: | replaced by ping | :red_square: |
 | ping resource | :white_check_mark: | :white_check_mark: | :white_check_mark: | 0.1 / pre alpha | :white_check_mark: |
 | status resource extension | :white_check_mark: | :white_check_mark: | :white_large_square: | 0.2 / pre beta |:white_large_square: |
-| securing the API with HTTPS | :white_check_mark: | :white_large_square: | :white_large_square: | 0.2 / pre beta |:white_large_square: |
+| TLS/HTTPS | :white_check_mark: | :white_check_mark: | :white_large_square: | 0.2 / pre beta |:white_large_square: |
 | /auth resource | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |:white_large_square: |
 | digest authentication | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |:white_large_square: |
 | ability to subscribe to resources | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |:white_large_square: |
