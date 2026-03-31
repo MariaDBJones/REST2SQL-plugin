@@ -11,10 +11,11 @@
 | TLS/HTTPS | :white_check_mark: | :white_check_mark: | :white_large_square: | 0.2 / pre beta |:white_large_square: |
 | /auth resource | :white_check_mark: | :white_check_mark: | :white_large_square: | 0.3 / pre alpha |:white_large_square: |
 | digest authentication | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |:white_large_square: |
-| ability to subscribe to resources | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |:white_large_square: |
-| linking subscription to a mrdb role | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |:white_large_square: |
+| API user management | :white_check_mark: | :white_large_square: | :white_large_square: | 0.3 / pre alpha |:white_large_square: |
+| endpoint subscription | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |:white_large_square: |
+| linking subscription to a mrdb role (RBAC) | :white_check_mark: | :white_large_square: | :white_large_square: | 0.4 / pre alpha |:white_large_square: |
 | default hidden schemas : mysql, rest2sql | :white_check_mark: | :white_large_square: | :white_large_square: | 0.5 / pre alpha |:white_large_square: |
-| credentials + session like behaviour with libjwt-c | :white_check_mark: | :white_large_square: | :white_large_square: | 0.6 pre alpha  |:white_large_square: |
+| credentials + session like behaviour with jwt | :white_check_mark: | :white_large_square: | :white_large_square: | 0.6 pre alpha  |:white_large_square: |
 | add status variables : have_json2sql, counters | :white_check_mark: | :white_large_square: | :white_large_square: | 0.7 / alpha |:white_large_square: |
 | add system variables : address, port, etc | :white_check_mark: | :white_large_square: | :white_large_square: | 0.8 / alpha | :white_large_square: |
 | input sanitation | :white_check_mark: | :white_large_square: | :white_large_square: | 0.9 / beta |:white_large_square: |
