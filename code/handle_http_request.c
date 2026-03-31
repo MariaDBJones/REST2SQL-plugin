@@ -104,44 +104,24 @@ static int http_request_handler(void *cls,
 #if HANDLERCORK == 0
 
     if (strcmp(method, "GET") == 0) {
-#if GETMETHODCORK == 0
+
         response = handle_get_request(url);
-#else
-        response = cJSON_CreateObject();
-        http_set_error(response, "GET method disabled", HTTP_METHOD_NOT_ALLOWED);
-#endif
 
     } else if (strcmp(method, "POST") == 0) {
-#if POSTMETHODCORK == 0
-        response = handle_post_request(url, upload_data, upload_data_size);
-#else
-        response = cJSON_CreateObject();
-        http_set_error(response, "POST method disabled", HTTP_METHOD_NOT_ALLOWED);
-#endif
 
+        response = handle_post_request(url, upload_data, upload_data_size);
+        
     } else if (strcmp(method, "PATCH") == 0) {
-#if PATCHMETHODCORK == 0
+
         response = handle_patch_request(url, upload_data, upload_data_size);
-#else
-        response = cJSON_CreateObject();
-        http_set_error(response, "PATCH method disabled", HTTP_METHOD_NOT_ALLOWED);
-#endif
 
     } else if (strcmp(method, "PUT") == 0) {
-#if PUTMETHODCORK == 0
+
         response = handle_put_request(url, upload_data, upload_data_size);
-#else
-        response = cJSON_CreateObject();
-        http_set_error(response, "PUT method disabled", HTTP_METHOD_NOT_ALLOWED);
-#endif
 
     } else if (strcmp(method, "DELETE") == 0) {
-#if DELETEMETHODCORK == 0
+
         response = handle_delete_request(url);
-#else
-        response = cJSON_CreateObject();
-        http_set_error(response, "DELETE method disabled", HTTP_METHOD_NOT_ALLOWED);
-#endif
 
     } else {
         response = cJSON_CreateObject();
