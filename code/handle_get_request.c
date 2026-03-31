@@ -235,6 +235,8 @@ cJSON *handle_get_request(const char *url)
     if (json_response == NULL)
         return NULL;
 
+#if GETMETHODCORK == 0
+
     /* Validation URL */
     if (!http_validate_url(url, json_response)) {
         HTTP_DEBUG_STAMP(json_response, "end");
@@ -346,5 +348,9 @@ cJSON *handle_get_request(const char *url)
     HTTP_DEBUG_STAMP(json_response, "end");
 
     mysql_close(conn);
+
+#else
+        http_set_error(json_response, "GET method disabled", HTTP_METHOD_NOT_ALLOWED);
+#endif
     return json_response;
 }
