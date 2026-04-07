@@ -3,9 +3,10 @@
 // #include "handle_put_request.h"
 // #include "handle_post_request.h"
 // #include "handle_patch_request.h"
+// #include "handle_delete_request.h"
 #include "hande_auth_request.h"
 // #include "handle_subscription_request.h"
-// #include "handle_delete_request.h"
+
 
 /* ============================================================
  *  Validation
