@@ -108,7 +108,19 @@ static int http_request_handler(void *cls,
 
     /* Init MariaDB pour ce thread */
     mysql_thread_init();
+
+    // if auth, handle it here
+    if (strcmp(url,"auth") == 0 {
  
+        response = handle_auth_request(url, upload_data, upload_data_size);
+
+    // if subscription, handle it here
+    } else if (strcmp(url,"subscription") == 0 {
+
+        response = handle_subscription_request(method, url, upload_data, upload_data_size);
+
+    // if any other endpoint, handle it here
+    } else {
 #if HANDLERCORK == 0
 
     if (strcmp(method, "GET") == 0) {
@@ -143,8 +155,9 @@ static int http_request_handler(void *cls,
     response = cJSON_CreateObject();
     http_set_error(response, "Plugin disabled", HTTP_METHOD_NOT_ALLOWED);
 #endif
-
-    /* Garde-fou : si un handler retourne NULL (OOM), on répond 500 */
+        
+    }
+    /* Safeguard : if a handler return NULL (OOM), we answer HTTP/500 */
     if (response == NULL) {
         response = cJSON_CreateObject();
         if (response != NULL)
@@ -158,7 +171,7 @@ static int http_request_handler(void *cls,
 
     int ret = http_send_json_response(connection, response);
 
-    cJSON_Delete(response);   /* cJSON_Delete, pas free() */
+    cJSON_Delete(response);   /* cJSON_Delete, not free() */
     mysql_thread_end();
 
     return ret;
