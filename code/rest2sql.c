@@ -40,6 +40,37 @@ rest2sql_config_t rest2sql_config = {
 };
 
 /* ============================================================
+ *  Plugin sysvars init
+ * ============================================================ */
+/* have_rest2sql — read only, type string */
+static MYSQL_SYSVAR_STR(
+  have_rest2sql,            /* nom → SHOW VARIABLES LIKE 'have_rest2sql' */
+  have_rest2sql_val,        /* value pointer */
+  PLUGIN_VAR_READONLY | PLUGIN_VAR_NOSYSVAR,
+  "Whether rest2sql plugin is installed (YES/NO)",
+  NULL,                     /* check function */
+  NULL,                     /* update function */
+  "YES"                     /* valeur par défaut */
+);
+
+/* rest2sql_on — lecture/écriture, type bool */
+static MYSQL_SYSVAR_BOOL(
+  on,                       /* suffixe → rest2sql_on */
+  rest2sql_enabled,         /* pointeur vers la valeur */
+  PLUGIN_VAR_RQCMDARG,
+  "Enable or disable rest2sql request processing",
+  NULL,                     /* check function */
+  NULL,                     /* update function */
+  TRUE                      /* activé par défaut */
+);
+
+static struct st_mysql_sys_var *rest2sql_sysvars[] = {
+  MYSQL_SYSVAR(have_rest2sql),
+  MYSQL_SYSVAR(on),
+  NULL
+};
+
+/* ============================================================
  *  Plugin variables init
  * ============================================================ */
 
@@ -89,7 +120,7 @@ static void load_plugin_config(void) {
 /* ============================================================
  *  Plugin init
  * ============================================================ */
-static int rest_api_plugin_init(void *p)
+static int rest2sql_init(void *p)
 {
     (void)p;
 
@@ -130,7 +161,7 @@ static int rest_api_plugin_init(void *p)
 /* ============================================================
  *  Plugin deinit
  * ============================================================ */
-static int rest_api_plugin_deinit(void *p)
+static int rest2sql_deinit(void *p)
 {
     (void)p;
 
@@ -145,6 +176,7 @@ static int rest_api_plugin_deinit(void *p)
 
 // TODO:variables
 //+--------------+
+// rest2sql_on 
 // bind-address *
 // port *
 // plugin-user *
@@ -200,9 +232,11 @@ static int rest_api_plugin_deinit(void *p)
  *    cnx_timeout, read_timeout, write_timeout
  *
  *  TODO status vars :
- *    requests_{get,post,patch,put,delete}
- *    responses_{ok,bad_request,unauthorized,forbidden,
+ *    rest2sql_{get,post,patch,put,delete}
+ *    rest2sql_{ok,bad_request,unauthorized,forbidden,
  *               not_found,method_not_allowed,internal_error}
+ *    rest2sql_on
+ *    have_rest2sql
  * ============================================================ */
 maria_declare_plugin(json_api)
 {
@@ -212,8 +246,8 @@ maria_declare_plugin(json_api)
     PLUGIN_AUTHOR,
     PLUGIN_DESCRIPTION,
     PLUGIN_LICENSE_GPL,
-    rest_api_plugin_init,
-    rest_api_plugin_deinit,
+    rest2sql_init,
+    rest2sql_deinit,
     0x0100,
     NULL,   /* status vars  — TODO */
     NULL,   /* system vars  — TODO */
