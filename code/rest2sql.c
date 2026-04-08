@@ -5,7 +5,7 @@
 #include <mysql/plugin.h>
 #include <microhttpd.h>
 
-#include <mariadb/mariadb_com.h>   /* mariadb_load_defaults() — API publique */
+#include <mysql/mariadb_com.h>   /* mariadb_load_defaults() — résolu via mariadb_config */
 
 #ifndef MYSQL_DYNAMIC_PLUGIN
 #define MYSQL_DYNAMIC_PLUGIN
