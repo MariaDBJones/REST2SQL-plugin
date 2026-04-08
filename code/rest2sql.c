@@ -20,6 +20,22 @@ struct st_mysql_daemon rest_api_plugin = {
 
 static struct MHD_Daemon *listener = NULL;
 
+/* ============================================================
+ *  Plugin status variables — backing storage
+ * ============================================================ */
+
+/* have_rest2sql : always "YES" while the plugin is loaded.
+ * Disappears from SHOW VARIABLES automatically when unloaded. */
+char have_rest2sql_val[] = "YES";
+
+/* rest2sql_enabled : gates all request processing.
+ * SET GLOBAL rest2sql_on = OFF disables without unloading. */
+my_bool rest2sql_enabled = TRUE;
+
+/* ============================================================
+ *  Plugin configuration — defaults (overridden by my.cnf)
+ * ============================================================ */
+
 // valeurs par defaut
 rest2sql_config_t rest2sql_config = {
     .address             = "0.0.0.0",
@@ -245,7 +261,7 @@ maria_declare_plugin(json_api)
     rest2sql_deinit,
     0x0100,
     NULL,   /* status vars  — TODO */
-    NULL,   /* system vars  — TODO */
+    rest2sql_sysvars,   /* system vars : have_rest2sql, rest2sql_on */
     NULL,
     MariaDB_PLUGIN_MATURITY_BETA
 }

@@ -97,4 +97,34 @@
 
 #define DEBUG  1
 
+/* ============================================================
+ *  Plugin configuration struct
+ *  Populated from [rest2sql] group in my.cnf at init time.
+ * ============================================================ */
+typedef struct {
+    char    address[64];
+    int     port;
+    char    sslcert[256];
+    char    sslkey[256];
+    char    sslca[256];
+    char    default_exposition[16];  /* "blacklist" | "whitelist" */
+    int     jwt_expiry;              /* seconds */
+    int     concurrency;
+    int     connect_timeout;         /* seconds */
+    int     debug;
+} rest2sql_config_t;
+
+extern rest2sql_config_t rest2sql_config;
+
+/* ============================================================
+ *  Plugin system variables (sysvars)
+ *
+ *  have_rest2sql  — read-only string, always "YES" when loaded.
+ *                   Mirrors the pattern of have_ssl / have_openssl.
+ *  rest2sql_enabled — bool, togglable at runtime via SET GLOBAL.
+ *                   Controls whether the plugin processes requests.
+ * ============================================================ */
+extern char     have_rest2sql_val[];   /* defined in rest2sql.c */
+extern my_bool  rest2sql_enabled;      /* defined in rest2sql.c */
+
 #endif // GLOBALS_H
