@@ -1,4 +1,5 @@
 # Use Rocky Linux as the base image
+# change this to comile on your favored linux flavour
 FROM rockylinux/rockylinux:8 AS build
 
 # Add a label for the image author
@@ -25,7 +26,7 @@ ENV PATH="${PATH}:/opt"
 # setting the branch name we want to clone
 ENV GITBRANCH=dev
 
-# creating basic config file & utility scripts for easy dev & test
+# now creating basic config file & utility scripts for easy dev & test
 
 # minimal config
 RUN printf "[mariadb]\nplugin-load-add=librest2sql\nplugin_maturity=unknown\nskip-name-resolve\n" > /etc/rest2sql.cnf
@@ -34,7 +35,7 @@ RUN printf "[mariadb]\nplugin-load-add=librest2sql\nplugin_maturity=unknown\nski
 RUN printf "#!/bin/bash\nmariadb -e '\''grant process, select on *.* to `api`@`localhost` identified by '\''passw0rd'\'''\''\n" > user
 RUN printf "#!/bin/bash \n cd /app \ngit clone -b \"${1:-$GITBRANCH}\" --single-branch --depth 1 https://github.com/MariaDBJones/REST2SQL-plugin.git . \nmkdir build \ncd build \n cmake .. \n" > clone
 RUN printf "#!/bin/bash \n cd /app/build \n cmake --build . --verbose \n" > build
-RUN printf "#!/bin/bash \n cp -f /app/plugin/librest2sql.so /usr/lib64/mysql/plugin/ \n mariadbd-safe --defaults-extra-file=/etc/rest2sql.cnf & && grep plugin /var/lib/mysql/*.err" > deploy
+RUN printf "#!/bin/bash \n cp -f /app/plugin/librest2sql.so /usr/lib64/mysql/plugin/ \n mariadbd-safe --defaults-extra-file=/etc/rest2sql.cnf && grep plugin /var/lib/mysql/*.err" > deploy
 RUN printf "#!/bin/bash \n mariadb -e 'shutdown;' \n rm -f /usr/lib64/mysql/plugin/librest2sql.so \n rm -f /app/plugin/librest2sql.so \n" > clean
 RUN printf "[rest2sql] \n rest2sql_address=127.0.0.1 \n rest2sql_port=3000 \n" >> /etc/rest2sql.cnf
 
@@ -42,7 +43,10 @@ RUN printf "[rest2sql] \n rest2sql_address=127.0.0.1 \n rest2sql_port=3000 \n" >
 RUN printf "#!/bin/bash \n curl -i -X GET http://127.0.0.1:3000/v1/status" > status
 RUN printf "#!/bin/bash \n curl -i -X GET http://127.0.0.1:3000/v1/ping" > pingz
 
-# # Set the working directory to /app
+# make scripts executables
+RUN chmod -R +x /opt
+
+# Set the working directory to /app
 WORKDIR /app
 
 # Expose the default rest2sql port
