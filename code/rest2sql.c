@@ -5,7 +5,7 @@
 #include <mysql/plugin.h>
 #include <microhttpd.h>
 
-#include <my_default.h>
+#include <mariadb/mariadb_com.h>   /* mariadb_load_defaults() — API publique */
 
 #ifndef MYSQL_DYNAMIC_PLUGIN
 #define MYSQL_DYNAMIC_PLUGIN
@@ -90,7 +90,11 @@ static void load_plugin_config(void) {
     char **argv_ptr = NULL;
     int    argc_ptr = 0;
 
-    if (load_defaults("my", groups, &argc_ptr, &argv_ptr) != 0) {
+    /* mariadb_load_defaults() est l'API cliente publique (mariadb_com.h).
+     * Elle retourne void — pas de code d'erreur, argv_ptr reste NULL si
+     * le fichier de config est absent, ce qui est géré ci-dessous. */
+    mariadb_load_defaults("my", groups, &argc_ptr, &argv_ptr);
+    if (argv_ptr == NULL) {
         fprintf(stderr, "[rest2sql] WARNING: could not read config file\n");
         return;
     }
@@ -125,7 +129,7 @@ static void load_plugin_config(void) {
             rest2sql_config.debug = atoi(value);
     }
 
-    free_defaults(argv_ptr);
+    free(argv_ptr);
 }
 
 /* ============================================================

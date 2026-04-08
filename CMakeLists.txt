@@ -19,9 +19,10 @@ add_library(rest2sql MODULE ${SOURCES})
 # new school include (afaik)
 target_include_directories(rest2sql
     PRIVATE
-        /usr/include/mysql/server
-        ${CMAKE_SOURCE_DIR}/include   # resolves: #include "common.h"
-        ${CMAKE_SOURCE_DIR}           # resolves: #include "include/common.h"
+        /usr/include/mysql/server    # resolves: internal server headers
+        /usr/include/mariadb         # resolves: mariadb_com.h (mariadb_load_defaults)
+        ${CMAKE_SOURCE_DIR}/include  # resolves: #include "common.h"
+        ${CMAKE_SOURCE_DIR}          # resolves: #include "include/common.h"
 )
 
 target_link_libraries(rest2sql cjson microhttpd mysqlservices)
