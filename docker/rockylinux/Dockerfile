@@ -28,14 +28,14 @@ ENV GITBRANCH=dev
 # creating basic config file & utility scripts for easy dev & test
 
 # minimal config
-RUN printf "[mariadb]\nplugin-load-add=libjson2sql\nplugin_maturity=unknown\nskip-name-resolve\n" > /etc/rest2sql.cnf
+RUN printf "[mariadb]\nplugin-load-add=librest2sql\nplugin_maturity=unknown\nskip-name-resolve\n" > /etc/rest2sql.cnf
 
 # utilities
 RUN printf "#!/bin/bash\nmariadb -e '\''grant process, select on *.* to `api`@`localhost` identified by '\''passw0rd'\'''\''\n" > user
-RUN printf "#!/bin/bash \n cd /app \ngit clone -b \"${1:-$GITBRANCH}\" --single-branch --depth 1 https://github.com/MariaDBJones/json2sql-plugin.git . \nmkdir build \ncd build \n cmake .. \n" > clone
+RUN printf "#!/bin/bash \n cd /app \ngit clone -b \"${1:-$GITBRANCH}\" --single-branch --depth 1 https://github.com/MariaDBJones/REST2SQL-plugin.git . \nmkdir build \ncd build \n cmake .. \n" > clone
 RUN printf "#!/bin/bash \n cd /app/build \n cmake --build . --verbose \n" > build
-RUN printf "#!/bin/bash \n cp -f /app/plugin/libjson2sql.so /usr/lib64/mysql/plugin/ \n mariadbd-safe --defaults-extra-file=/etc/load_jsonplugin.cnf & && grep plugin /var/lib/mysql/*.err" > deploy
-RUN printf "#!/bin/bash \n mariadb -e 'shutdown;' \n rm -f /usr/lib64/mysql/plugin/libjson2sql.so \n rm -f /app/plugin/libjson2sql.so \n" > clean
+RUN printf "#!/bin/bash \n cp -f /app/plugin/librest2sql.so /usr/lib64/mysql/plugin/ \n mariadbd-safe --defaults-extra-file=/etc/rest2sql.cnf & && grep plugin /var/lib/mysql/*.err" > deploy
+RUN printf "#!/bin/bash \n mariadb -e 'shutdown;' \n rm -f /usr/lib64/mysql/plugin/librest2sql.so \n rm -f /app/plugin/librest2sql.so \n" > clean
 RUN printf "[rest2sql] \n rest2sql_address=127.0.0.1 \n rest2sql_port=3000 \n" >> /etc/rest2sql.cnf
 
 # test scripts

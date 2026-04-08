@@ -249,7 +249,7 @@ static int rest2sql_deinit(void *p)
  *    rest2sql_on
  *    have_rest2sql
  * ============================================================ */
-maria_declare_plugin(json_api)
+maria_declare_plugin(rest2sql)
 {
     MYSQL_DAEMON_PLUGIN,
     &rest_api_plugin,

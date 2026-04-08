@@ -2,7 +2,7 @@
 #include <time.h>
 #include <string.h>
 
-#define LOG_FILE_NAME "/app/log/json2sql.log"
+#define LOG_FILE_NAME "/app/log/rest2sql.log"
 
 void log_message(const char *message) {
     FILE *log_file;
