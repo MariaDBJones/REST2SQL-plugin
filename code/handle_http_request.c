@@ -3,9 +3,8 @@
 #include "handle_put_request.h"
 #include "handle_post_request.h"
 #include "handle_patch_request.h"
-#include "handle_put_request.h"
 #include "handle_delete_request.h"
-#include "hande_auth_request.h"
+#include "handle_auth_request.h"
 // #include "handle_subscription_request.h"
 
 
@@ -93,7 +92,7 @@ int http_send_json_response(struct MHD_Connection *connection,
 /* ============================================================
  *  Request dispatcher
  * ============================================================ */
-static int http_request_handler(void *cls,
+int http_request_handler(void *cls,
                             struct MHD_Connection *connection,
                             const char *url,
                             const char *method,
@@ -111,12 +110,12 @@ static int http_request_handler(void *cls,
     mysql_thread_init();
 
     // if auth, handle it here
-    if (strcmp(url,"auth") == 0 {
+    if (strcmp(url,"auth") == 0) {
  
         response = handle_auth_request(url, upload_data, upload_data_size);
 
     // if subscription, handle it here
-    } else if (strcmp(url,"subscription") == 0 {
+    } else if (strcmp(url,"subscription") == 0) {
 
         response = handle_subscription_request(method, url, upload_data, upload_data_size);
 

@@ -152,7 +152,7 @@ static int rest2sql_init(void *p)
         MHD_USE_THREAD_PER_CONNECTION,
         PORT,
         NULL, NULL,
-        &request_handler, NULL,
+        &http_request_handler, NULL,
         MHD_OPTION_SOCK_ADDR, &addr,
         /* MHD_OPTION_THREAD_POOL_SIZE, 5, */  /* TODO: system variable */
         MHD_OPTION_END
