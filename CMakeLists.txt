@@ -20,7 +20,8 @@ add_library(rest2sql MODULE ${SOURCES})
 target_include_directories(rest2sql
     PRIVATE
         /usr/include/mysql/server
-        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/include   # resolves: #include "common.h"
+        ${CMAKE_SOURCE_DIR}           # resolves: #include "include/common.h"
 )
 
 target_link_libraries(rest2sql cjson microhttpd mysqlservices)
