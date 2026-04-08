@@ -34,7 +34,7 @@ RUN printf "[mariadb]\nplugin-load-add=librest2sql\nplugin_maturity=unknown\nski
 # utilities
 RUN printf "#!/bin/bash \n rm -rf /app && mkdir -p /app \n cd /app \n git clone -b \"${1:-$GITBRANCH}\" --single-branch --depth 1 https://github.com/MariaDBJones/REST2SQL-plugin.git . \n mkdir build \n cd build \n cmake .. \n cd /app/build \n cmake --build . --verbose \n" > build
 RUN printf "#!/bin/bash \n cp -f /app/plugin/librest2sql.so /usr/lib64/mysql/plugin/ \n mariadbd-safe --defaults-extra-file=/etc/rest2sql.cnf & \n sleep 3 \n grep -i plugin /var/lib/mysql/*.err \n" > deploy
-RUN printf "#!/bin/bash \n mariadb -e 'shutdown;' \n rm -f /usr/lib64/mysql/plugin/librest2sql.so \n rm -rf /app \n mkdir -p /app" > clean
+RUN printf "#!/bin/bash \n mariadb -e 'shutdown;' || true \n rm -f /usr/lib64/mysql/plugin/librest2sql.so \n rm -rf /app \n mkdir -p /app" > clean
 
 # test scripts
 RUN printf "#!/bin/bash \n curl -i -X GET http://127.0.0.1:3000/v1/status" > status
