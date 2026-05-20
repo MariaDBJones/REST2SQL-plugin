@@ -150,6 +150,9 @@ static int rest2sql_init(void *p)
         return 1;
     }
 
+    /* Reading the config from section [rest2sql] in file */
+    load_plugin_config();
+    
     /* Binding ADDRESS:PORT */
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
