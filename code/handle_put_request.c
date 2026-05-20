@@ -11,9 +11,9 @@ cJSON *handle_put_request(const char *url,
     cJSON_AddStringToObject(r, "url", url ? url : "");
 #if PUTMETHODCORK == 0
     http_set_error(r, "PUT not available",
-                   HTTP_METHOD_NOT_ALLOWED);
+                   HTTP_NOT_FOUND);
 #else
-        http_set_error(r, "PUT method disabled", HTTP_METHOD_NOT_ALLOWED);
+        http_set_error(r, "PUT method disabled", HTTP_NOT_FOUND);
 #endif
     return r;
 }
