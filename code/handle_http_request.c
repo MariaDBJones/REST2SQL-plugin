@@ -107,9 +107,6 @@ int http_request_handler(void *cls,
 
     cJSON *response = NULL;
 
-    /* Init MariaDB pour ce thread */
-    mysql_thread_init();
-
     // if auth, handle it here
     if (strcmp(url,"auth") == 0) {
  
@@ -173,7 +170,6 @@ int http_request_handler(void *cls,
     int ret = http_send_json_response(connection, response);
 
     cJSON_Delete(response);   /* cJSON_Delete, not free() */
-    mysql_thread_end();
 
     return ret;
 }
