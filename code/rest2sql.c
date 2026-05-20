@@ -20,6 +20,11 @@ struct st_mysql_daemon rest_api_plugin = {
 
 static struct MHD_Daemon *listener = NULL;
 
+/* =========================================================== 
+ *  SQL service cnx pointer
+ * =========================================================== */
+MYSQL *g_conn = NULL;
+
 /* ============================================================
  *  Plugin status variables — backing storage
  * ============================================================ */
@@ -169,6 +174,18 @@ static int rest2sql_init(void *p)
         return 1;
     }
 
+    g_conn = mysql_init(NULL);
+    if (!g_conn) return 1;
+
+    if (!mysql_real_connect_local(g_conn))
+    {
+        fprtinf(stderr, "[rest2sql] Failed to open SQLService global cnx.\n");
+        mysql_close(g_conn);
+        g_conn = NULL;
+        mysql_library_end();
+        return 1;
+    }
+    
     fprintf(stderr, "[rest2sql] Server running on %s:%d\n", ADDRESS, PORT);
     return 0;
 }
@@ -184,6 +201,11 @@ static int rest2sql_deinit(void *p)
         MHD_stop_daemon(listener);
         listener = NULL;
         fprintf(stderr, "[rest2sql] HTTP server stopped.\n");
+    }
+    if (gconn != NULL) {
+        mysql_close(g_conn);
+        g_conn = NULL;
+        fprintf(stderr, "[rest2sql] SQL Service global cnx closed.\n");
     }
     mysql_library_end();
     return 0;
