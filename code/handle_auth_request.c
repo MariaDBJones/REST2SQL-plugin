@@ -7,7 +7,7 @@
 // /auth/renew
 // /auth/create
 
-cJSON* handle_auth_request(const char *url,
+cJSON* handle_session_request(const char *url,
                            const char *upload_data,
                            size_t     *upload_data_size)
 {
@@ -21,4 +21,10 @@ cJSON* handle_auth_request(const char *url,
     http_set_error(r, "Auth not yet implemented", HTTP_METHOD_NOT_ALLOWED);
 
     return r;
+}
+
+MYSQL *handle_auth_request(struct MHD_Connection *connection)
+{
+    (void)connection;
+    return g_conn;
 }
