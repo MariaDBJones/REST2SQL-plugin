@@ -338,7 +338,7 @@ cJSON *handle_get_request(const char *url)
         mysql_stmt_close(stmt);
 
     } else {
-        http_set_error(json_response, "Bad request", HTTP_BAD_REQUEST);
+        http_set_error(json_response, "Bad request", HTTP_NOT_FOUND);
         mysql_close(conn);
         HTTP_DEBUG_STAMP(json_response, "end");
         return json_response;
