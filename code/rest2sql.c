@@ -164,6 +164,9 @@ static int rest2sql_init(void *p)
         &http_request_handler, NULL,
         MHD_OPTION_SOCK_ADDR, &addr,
         /* MHD_OPTION_THREAD_POOL_SIZE, 5, */  /* TODO: system variable */
+        MHD_OPTION_NOTIFY_CONNECTION, connection_started,
+                                      connection_finished,
+                                      NULL,
         MHD_OPTION_END
     );
 
