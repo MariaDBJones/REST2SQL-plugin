@@ -84,8 +84,8 @@
 #define STRING_WITH_STRLEN(X) (X), (strlen(X))
 
 // TODO : managing this via system variables
-#define PORT 3000
-#define ADDRESS "0.0.0.0"
+#define DEFAULT_PORT 3000
+#define DEFAULT_ADDRESS "0.0.0.0"
 
 // TODO : obfuscate
 // read variables from [rest2sql] group in cnf files
