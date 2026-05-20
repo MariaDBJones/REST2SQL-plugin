@@ -13,10 +13,10 @@ cJSON *handle_post_request(const char *url,
 
 #if POSTMETHODCORK == 0
     http_set_error(r, "POST not available",
-                   HTTP_METHOD_NOT_ALLOWED);  
+                   HTTP_NOT_FOUND);  
 #else
     http_set_error(r, "POST disabled", 
-                   HTTP_METHOD_NOT_ALLOWED);
+                   HTTP_NOT_FOUND);
 #endif
     
     return r;
