@@ -10,10 +10,10 @@ cJSON* handle_delete_request(const char *url) {
     cJSON_AddStringToObject(r, "url", url ? url : "");
 #if DELETEMETHODCORK == 0
     http_set_error(r, "DELETE not available",
-                   HTTP_METHOD_NOT_ALLOWED);  
+                   HTTP_NOT_FOUND);  
 #else
     http_set_error(r, "DELETE disabled", 
-                   HTTP_METHOD_NOT_ALLOWED);
+                   HTTP_NOT_FOUND);
 #endif
     return r;
 }
