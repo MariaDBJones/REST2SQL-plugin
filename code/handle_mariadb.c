@@ -4,5 +4,5 @@
 
 int handle_authentication_request() {
   
-  return 0;
+  return 1;
 }
