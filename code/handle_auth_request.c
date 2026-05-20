@@ -29,7 +29,7 @@ MYSQL *handle_auth_request(struct MHD_Connection *connection)
     return g_conn;
 }
 
-static void connection_started(void *cls,
+static void connection_start(void *cls,
                                 struct MHD_Connection *connection,
                                 void **socket_context)
 {
@@ -37,7 +37,7 @@ static void connection_started(void *cls,
     mysql_thread_init();
 }
 
-static void connection_finished(void *cls,
+static void connection_finish(void *cls,
                                  struct MHD_Connection *connection,
                                  void **socket_context,
                                  enum MHD_RequestTerminationCode toe)
