@@ -2,7 +2,8 @@
 #include <common.h>
 #include <microhttpd.h>
 
-int handle_authentication_request() {
-  
-  return 1;
+MYSQL *handle_authentication_request(struct MHD_Connection *connection)
+{
+    (void)connection;
+    return g_conn;
 }
