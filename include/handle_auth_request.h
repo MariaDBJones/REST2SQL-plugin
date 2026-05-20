@@ -14,5 +14,15 @@ cJSON* handle_session_request(const char *url,
                            const char *upload_data,
                            size_t     *upload_data_size);
 
+MYSQL *handle_auth_request(struct MHD_Connection *connection);
+
+void connection_started(void *cls,
+                         struct MHD_Connection *connection,
+                         void **socket_context);
+
+void connection_finished(void *cls,
+                          struct MHD_Connection *connection,
+                          void **socket_context,
+                          enum MHD_RequestTerminationCode toe);
 
 #endif // HANDLE_AUTH_REQUEST_H
