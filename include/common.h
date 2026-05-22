@@ -84,7 +84,7 @@
 #define STRING_WITH_STRLEN(X) (X), (strlen(X))
 
 // TODO : managing this via system variables
-#define DEFAULT_PORT 3000
+#define DEFAULT_PORT    8080
 #define DEFAULT_ADDRESS "0.0.0.0"
 
 // TODO : obfuscate

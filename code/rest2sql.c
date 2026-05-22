@@ -20,7 +20,7 @@ struct st_mysql_daemon rest_api_plugin = {
 
 static struct MHD_Daemon *listener = NULL;
 
-/* =========================================================== 
+/* ===========================================================
  *  SQL service cnx pointer
  * =========================================================== */
 MYSQL *g_conn = NULL;
@@ -40,11 +40,9 @@ my_bool rest2sql_enabled = TRUE;
 /* ============================================================
  *  Plugin configuration — defaults (overridden by my.cnf)
  * ============================================================ */
-
-// valeurs par defaut
 rest2sql_config_t rest2sql_config = {
-    .address             = "0.0.0.0",
-    .port                = 3000,
+    .address             = DEFAULT_ADDRESS,
+    .port                = DEFAULT_PORT,
     .sslcert             = "",
     .sslkey              = "",
     .sslca               = "",
@@ -89,7 +87,6 @@ static struct st_mysql_sys_var *rest2sql_sysvars[] = {
 /* ============================================================
  *  Plugin variables init
  * ============================================================ */
-
 static void load_plugin_config(void) {
     const char *groups[] = { APIGROUP, NULL };
     char **argv_ptr = NULL;
@@ -105,10 +102,9 @@ static void load_plugin_config(void) {
     }
 
     for (int i = 0; argv_ptr[i] != NULL; i++) {
-        char key[64]   = {0};
+        char key[64]    = {0};
         char value[256] = {0};
 
-        // parser "--key=value"
         if (sscanf(argv_ptr[i], "--%63[^=]=%255s", key, value) != 2)
             continue;
 
@@ -150,23 +146,28 @@ static int rest2sql_init(void *p)
         return 1;
     }
 
-    /* Reading the config from section [rest2sql] in file */
+    /* Reading the config from section [rest2sql] in my.cnf */
     load_plugin_config();
-    
-    /* Binding ADDRESS:PORT */
+
+    /* Binding ADDRESS:PORT — utilise la config chargée */
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_port   = htons(PORT);
-    inet_pton(AF_INET, ADDRESS, &addr.sin_addr);
+    addr.sin_port   = htons((uint16_t)rest2sql_config.port);
+    if (inet_pton(AF_INET, rest2sql_config.address, &addr.sin_addr) != 1) {
+        fprintf(stderr, "[rest2sql] Invalid bind address: %s\n",
+                rest2sql_config.address);
+        mysql_library_end();
+        return 1;
+    }
 
     listener = MHD_start_daemon(
         MHD_USE_THREAD_PER_CONNECTION,
-        PORT,
+        (uint16_t)rest2sql_config.port,
         NULL, NULL,
         &http_request_handler, NULL,
         MHD_OPTION_SOCK_ADDR, &addr,
-        /* MHD_OPTION_THREAD_POOL_SIZE, 5, */  /* TODO: system variable */
+        /* MHD_OPTION_THREAD_POOL_SIZE, rest2sql_config.concurrency, */ /* TODO */
         MHD_OPTION_NOTIFY_CONNECTION, connection_start,
                                       connection_finish,
                                       NULL,
@@ -175,24 +176,44 @@ static int rest2sql_init(void *p)
 
     if (listener == NULL) {
         fprintf(stderr, "[rest2sql] Failed to start HTTP server on %s:%d\n",
-                ADDRESS, PORT);
+                rest2sql_config.address, rest2sql_config.port);
         mysql_library_end();
         return 1;
     }
 
     g_conn = mysql_init(NULL);
-    if (!g_conn) return 1;
-
-    if (!mysql_real_connect_local(g_conn))
-    {
-        fprtinf(stderr, "[rest2sql] Failed to open SQLService global cnx.\n");
-        mysql_close(g_conn);
-        g_conn = NULL;
+    if (!g_conn) {
+        MHD_stop_daemon(listener);
+        listener = NULL;
         mysql_library_end();
         return 1;
     }
-    
-    fprintf(stderr, "[rest2sql] Server running on %s:%d\n", ADDRESS, PORT);
+
+    /* Connexion sur socket Unix locale avec l'utilisateur OS courant. */
+    unsigned int timeout = (unsigned int)rest2sql_config.connect_timeout;
+    mysql_options(g_conn, MYSQL_OPT_CONNECT_TIMEOUT, &timeout);
+
+    if (!mysql_real_connect(g_conn,
+                            NULL,   /* host → socket Unix */
+                            NULL,   /* user → utilisateur OS */
+                            NULL,   /* pass → unix_socket auth */
+                            NULL,   /* db   */
+                            0,      /* port */
+                            NULL,   /* socket → défaut mysqld */
+                            0))
+    {
+        fprintf(stderr, "[rest2sql] Failed to open global cnx: %s\n",
+                mysql_error(g_conn));
+        mysql_close(g_conn);
+        g_conn = NULL;
+        MHD_stop_daemon(listener);
+        listener = NULL;
+        mysql_library_end();
+        return 1;
+    }
+
+    fprintf(stderr, "[rest2sql] Server running on %s:%d\n",
+            rest2sql_config.address, rest2sql_config.port);
     return 0;
 }
 
@@ -208,18 +229,20 @@ static int rest2sql_deinit(void *p)
         listener = NULL;
         fprintf(stderr, "[rest2sql] HTTP server stopped.\n");
     }
-    if (gconn != NULL) {
+
+    if (g_conn != NULL) {
         mysql_close(g_conn);
         g_conn = NULL;
-        fprintf(stderr, "[rest2sql] SQL Service global cnx closed.\n");
+        fprintf(stderr, "[rest2sql] Global cnx closed.\n");
     }
+
     mysql_library_end();
     return 0;
 }
 
 // TODO:variables
 //+--------------+
-// rest2sql_on 
+// rest2sql_on
 // bind-address *
 // port *
 // plugin-user *
@@ -292,7 +315,7 @@ maria_declare_plugin(rest2sql)
     rest2sql_init,
     rest2sql_deinit,
     0x0100,
-    NULL,   /* status vars  — TODO */
+    NULL,               /* status vars  — TODO */
     rest2sql_sysvars,   /* system vars : have_rest2sql, rest2sql_on */
     NULL,
     MariaDB_PLUGIN_MATURITY_BETA
