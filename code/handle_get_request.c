@@ -89,8 +89,9 @@ static void db_static_result_to_json(MYSQL_RES *result, cJSON *json_response)
     while ((row = mysql_fetch_row(result)) != NULL) {
         cJSON *row_obj = cJSON_CreateObject();
         for (unsigned int i = 0; i < num_fields; i++) {
-            cJSON_AddStringToObject(row_obj, fields[i].name,
-                                    row[i] ? row[i] : "NULL");
+            cJSON_AddItemToObject(row_obj, fields[i].name,
+                                  row[i] ? cJSON_CreateString(row[i])
+                                         : cJSON_CreateNull());
         }
         cJSON_AddItemToArray(data_array, row_obj);
     }
@@ -159,8 +160,9 @@ static void db_stmt_result_to_json(MYSQL_STMT *stmt, cJSON *json_response)
         cJSON *row_obj = cJSON_CreateObject();
         if (row_obj == NULL) break;
         for (unsigned int i = 0; i < num_fields; i++) {
-            cJSON_AddStringToObject(row_obj, fields[i].name,
-                                    is_nulls[i] ? "NULL" : row_bufs[i]);
+            cJSON_AddItemToObject(row_obj, fields[i].name,
+                                  is_nulls[i] ? cJSON_CreateNull()
+                                              : cJSON_CreateString(row_bufs[i]));
         }
         cJSON_AddItemToArray(data_array, row_obj);
     }
@@ -225,7 +227,8 @@ cJSON *handle_get_request(MYSQL *conn, const char *url)
 
     if (strcasecmp(resource, "ping") == 0 && nb_tokens == 2) {
         const char *q = "SELECT now()";
-        cJSON_AddStringToObject(json_response, "SQL", q);
+        if (rest2sql_config.debug)
+            cJSON_AddStringToObject(json_response, "SQL", q);
         MYSQL_RES *res = db_exec_static(conn, q, json_response);
         if (res == NULL) { HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
         db_static_result_to_json(res, json_response);
@@ -233,7 +236,8 @@ cJSON *handle_get_request(MYSQL *conn, const char *url)
 
     } else if (strcasecmp(resource, "status") == 0 && nb_tokens == 2) {
         const char *q = "SHOW GLOBAL STATUS";
-        cJSON_AddStringToObject(json_response, "SQL", q);
+        if (rest2sql_config.debug)
+            cJSON_AddStringToObject(json_response, "SQL", q);
         MYSQL_RES *res = db_exec_static(conn, q, json_response);
         if (res == NULL) { HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
         db_static_result_to_json(res, json_response);
@@ -243,7 +247,8 @@ cJSON *handle_get_request(MYSQL *conn, const char *url)
         char like_val[sizeof(schema) + 2];
         snprintf(like_val, sizeof(like_val), "%%%s%%", schema);
         const char *q = "SHOW GLOBAL STATUS LIKE ?";
-        cJSON_AddStringToObject(json_response, "SQL", q);
+        if (rest2sql_config.debug)
+            cJSON_AddStringToObject(json_response, "SQL", q);
         MYSQL_STMT *stmt = db_exec_prepared(conn, q, like_val, json_response);
         if (stmt == NULL) { HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
         db_stmt_result_to_json(stmt, json_response);
@@ -252,7 +257,8 @@ cJSON *handle_get_request(MYSQL *conn, const char *url)
     } else if (strcasecmp(resource, "struct") == 0 && nb_tokens == 4) {
         char q[QUERY_MAX_LEN];
         snprintf(q, sizeof(q), "SHOW COLUMNS FROM `%s`.`%s`", schema, table);
-        cJSON_AddStringToObject(json_response, "SQL", q);
+        if (rest2sql_config.debug)
+            cJSON_AddStringToObject(json_response, "SQL", q);
         MYSQL_RES *res = db_exec_static(conn, q, json_response);
         if (res == NULL) { HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
         db_static_result_to_json(res, json_response);
@@ -263,7 +269,8 @@ cJSON *handle_get_request(MYSQL *conn, const char *url)
         snprintf(q, sizeof(q),
                  "SELECT * FROM `%s`.`%s` WHERE `%s` = ?",
                  schema, table, column);
-        cJSON_AddStringToObject(json_response, "SQL", q);
+        if (rest2sql_config.debug)
+            cJSON_AddStringToObject(json_response, "SQL", q);
         MYSQL_STMT *stmt = db_exec_prepared(conn, q, value, json_response);
         if (stmt == NULL) { HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
         db_stmt_result_to_json(stmt, json_response);
