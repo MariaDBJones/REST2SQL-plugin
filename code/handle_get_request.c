@@ -271,6 +271,16 @@ cJSON *handle_get_request(MYSQL *conn, const char *url)
         mysql_free_result(res);
 
     } else if (strcasecmp(resource, "data") == 0 && nb_tokens == 6) {
+
+        /* Règle 2 — value ne peut pas être vide après strip.
+         * WHERE col = '' matcherait toutes les lignes avec colonne vide. */
+        if (vlen == 0) {
+            http_set_error(json_response, "WHERE value cannot be empty",
+                           HTTP_BAD_REQUEST);
+            HTTP_DEBUG_STAMP(json_response, "end");
+            return json_response;
+        }
+
         char q[QUERY_MAX_LEN];
         snprintf(q, sizeof(q),
                  "SELECT * FROM `%s`.`%s` WHERE `%s` = ?",
