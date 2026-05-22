@@ -5,7 +5,8 @@
 #include "handle_patch_request.h"
 #include "handle_delete_request.h"
 #include "handle_auth_request.h"
-#include "handle_mariadb.h"
+// handle_mariadb.h supprimé du repo, include orphelin retiré
+// #include "handle_mariadb.h"
 // #include "handle_subscription_request.h"
 
 
@@ -52,12 +53,10 @@ int http_send_json_response(struct MHD_Connection *connection,
 {
     int httpcode = HTTP_OK;
 
-    /* Extrait le httpcode depuis le JSON */
     cJSON *field = cJSON_GetObjectItemCaseSensitive(json_response, "httpcode");
     if (cJSON_IsNumber(field))
         httpcode = field->valueint;
 
-    /* Sérialise le JSON */
     char *json_str = cJSON_PrintUnformatted(json_response);
     if (json_str == NULL) {
         httpcode = HTTP_INTERNAL_SERVER_ERROR;
@@ -67,7 +66,6 @@ int http_send_json_response(struct MHD_Connection *connection,
             return MHD_NO;
     }
 
-    /* Crée la réponse HTTP */
     struct MHD_Response *mhd_response = MHD_create_response_from_buffer(
         strlen(json_str),
         (void *)json_str,
@@ -104,58 +102,60 @@ int http_request_handler(void *cls,
 {
     (void)cls;
     (void)version;
+    (void)con_cls;
 
     cJSON *response = NULL;
 
-    // if auth, handle it here
-    if (strcmp(url,"auth") == 0) {
- 
-        response = handle_auth_request(url, upload_data, upload_data_size);
+    /* strncmp sur le préfixe "/auth/" au lieu de strcmp sur "auth"
+     * Les URLs MHD arrivent toujours avec le slash initial : /auth/login,
+     * /data/schema/table, etc. strcmp(url,"auth") ne matchait jamais. */
+    if (strncmp(url, "/auth/", 6) == 0) {
 
-    // if subscription, handle it here
-    } else if (strcmp(url,"subscription") == 0) {
+        response = handle_session_request(url, upload_data, upload_data_size);
+
+    } else if (strncmp(url, "/subscription/", 14) == 0) {
 
         response = handle_subscription_request(method, url, upload_data, upload_data_size);
 
-    // if any other endpoint, handle it here
     } else {
 #if HANDLERCORK == 0
 
-    if (strcmp(method, "GET") == 0) {
+        if (strcmp(method, "GET") == 0) {
 
-        response = handle_get_request(url);
+            response = handle_get_request(url);
 
-    } else if (strcmp(method, "POST") == 0) {
+        } else if (strcmp(method, "POST") == 0) {
 
-        response = handle_post_request(url, upload_data, upload_data_size);
-        
-    } else if (strcmp(method, "PATCH") == 0) {
+            response = handle_post_request(url, upload_data, upload_data_size);
 
-        response = handle_patch_request(url, upload_data, upload_data_size);
+        } else if (strcmp(method, "PATCH") == 0) {
 
-    } else if (strcmp(method, "PUT") == 0) {
+            response = handle_patch_request(url, upload_data, upload_data_size);
 
-        response = handle_put_request(url, upload_data, upload_data_size);
+        } else if (strcmp(method, "PUT") == 0) {
 
-    } else if (strcmp(method, "DELETE") == 0) {
+            response = handle_put_request(url, upload_data, upload_data_size);
 
-        response = handle_delete_request(url);
+        } else if (strcmp(method, "DELETE") == 0) {
 
-    } else {
-        response = cJSON_CreateObject();
-        cJSON_AddStringToObject(response, "method", method);
-        cJSON_AddStringToObject(response, "url",    url);
-        http_set_error(response, "Method not allowed", HTTP_METHOD_NOT_ALLOWED);
-    }
+            response = handle_delete_request(url);
+
+        } else {
+            response = cJSON_CreateObject();
+            cJSON_AddStringToObject(response, "method", method);
+            cJSON_AddStringToObject(response, "url",    url);
+            http_set_error(response, "Method not allowed", HTTP_METHOD_NOT_ALLOWED);
+        }
 
 #else
-    /* HANDLERCORK == 1 : plugin entier désactivé */
-    response = cJSON_CreateObject();
-    http_set_error(response, "Plugin disabled", HTTP_METHOD_NOT_ALLOWED);
+        /* HANDLERCORK == 1 : plugin entier désactivé */
+        response = cJSON_CreateObject();
+        http_set_error(response, "Plugin disabled", HTTP_METHOD_NOT_ALLOWED);
 #endif
-        
+
     }
-    /* Safeguard : if a handler return NULL (OOM), we answer HTTP/500 */
+
+    /* Safeguard : if a handler returns NULL (OOM), answer HTTP/500 */
     if (response == NULL) {
         response = cJSON_CreateObject();
         if (response != NULL)
@@ -169,7 +169,7 @@ int http_request_handler(void *cls,
 
     int ret = http_send_json_response(connection, response);
 
-    cJSON_Delete(response);   /* cJSON_Delete, not free() */
+    cJSON_Delete(response);
 
     return ret;
 }
