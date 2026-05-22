@@ -16,6 +16,12 @@ int http_is_valid_sql_ident(const char *s)
 {
     if (s == NULL || *s == '\0')
         return 0;
+
+    /* Un identifiant SQL valide commence par une lettre ou un underscore —
+     * jamais par un chiffre. Bloque les contournements type column=1. */
+    if (isdigit((unsigned char)*s))
+        return 0;
+
     for (const char *p = s; *p != '\0'; p++) {
         if (!isalnum((unsigned char)*p) && *p != '_')
             return 0;
