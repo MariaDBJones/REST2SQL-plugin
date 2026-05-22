@@ -4,25 +4,25 @@
 #include "common.h"
 #include "handle_http_request.h"
 
-// Auth endpoints :
-//   POST /auth/login   — exchange credentials for a JWT
-//   POST /auth/logoff  — invalidate current JWT
-//   POST /auth/renew   — renew a JWT before expiry
-//   POST /auth/create  — create a new API user (admin only)
+// Auth endpoints — MVP : stubs returning 405
+// Beta : Basic Auth stateless via mysql_real_connect() per request
+//   POST /auth/login   — placeholder
+//   POST /auth/logoff  — placeholder
+//   POST /auth/renew   — placeholder
+//   POST /auth/create  — placeholder
 
 cJSON* handle_session_request(const char *url,
-                           const char *upload_data,
-                           size_t     *upload_data_size);
+                              const char *upload_data,
+                              size_t     *upload_data_size);
 
-MYSQL *handle_auth_request(struct MHD_Connection *connection);
-
+// MHD connection lifecycle callbacks — passed to MHD_OPTION_NOTIFY_CONNECTION
 void connection_start(void *cls,
-                         struct MHD_Connection *connection,
-                         void **socket_context);
+                      struct MHD_Connection *connection,
+                      void **socket_context);
 
 void connection_finish(void *cls,
-                          struct MHD_Connection *connection,
-                          void **socket_context,
-                          enum MHD_RequestTerminationCode toe);
+                       struct MHD_Connection *connection,
+                       void **socket_context,
+                       enum MHD_RequestTerminationCode toe);
 
 #endif // HANDLE_AUTH_REQUEST_H
