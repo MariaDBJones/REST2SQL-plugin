@@ -87,6 +87,11 @@ int http_send_json_response(struct MHD_Connection *connection,
 
 /* ============================================================
  *  Request dispatcher
+ *  Appelé une seule fois par requête HTTP (garanti par
+ *  MHD_OPTION_CONNECTION_MEMORY_LIMIT — body refusé si > MAX_BODY_SIZE).
+ *  La connexion MariaDB est locale à cet appel :
+ *    conn != NULL → authentifié
+ *    conn == NULL → 401
  * ============================================================ */
 int http_request_handler(void *cls,
                          struct MHD_Connection *connection,
@@ -99,40 +104,19 @@ int http_request_handler(void *cls,
 {
     (void)cls;
     (void)version;
+    (void)con_cls;
 
-    /* ----------------------------------------------------------
-     * 1er appel : con_cls == NULL
-     * Ouvrir la connexion MariaDB = étape d'authentification.
+    /* Ouverture de la connexion MariaDB = authentification.
      * MVP  : socket Unix, utilisateur OS.
-     * Beta : open_db_connection() extraira les credentials Basic Auth.
-     * ---------------------------------------------------------- */
-    if (*con_cls == NULL) {
-        mhd_conn_ctx_t *ctx = calloc(1, sizeof(mhd_conn_ctx_t));
-        if (ctx == NULL)
-            return MHD_NO;
+     * Beta : open_db_connection() extraira les credentials Basic Auth. */
+    MYSQL *conn = open_db_connection(connection);
 
-        ctx->conn = open_db_connection(connection);
-        *con_cls  = ctx;
-
-        /* MHD rappelle immédiatement pour traiter la requête */
-        return MHD_YES;
-    }
-
-    /* ----------------------------------------------------------
-     * 2ème appel : traitement de la requête
-     * ---------------------------------------------------------- */
-    mhd_conn_ctx_t *ctx  = *con_cls;
-    MYSQL          *conn = ctx->conn;
-
-    /* Connexion NULL = authentification échouée → 401 */
     if (conn == NULL) {
         cJSON *r = cJSON_CreateObject();
-        if (r == NULL) { free(ctx); *con_cls = NULL; return MHD_NO; }
+        if (r == NULL) return MHD_NO;
         http_set_error(r, "Unauthorized", HTTP_UNAUTHORIZED);
         int ret = http_send_json_response(connection, r);
         cJSON_Delete(r);
-        free(ctx);
-        *con_cls = NULL;
         return ret;
     }
 
@@ -187,21 +171,17 @@ int http_request_handler(void *cls,
         response = cJSON_CreateObject();
         if (response == NULL) {
             mysql_close(conn);
-            free(ctx);
-            *con_cls = NULL;
             return MHD_NO;
         }
         http_set_error(response, "Internal Server Error",
                        HTTP_INTERNAL_SERVER_ERROR);
     }
 
+    /* upload_data consommé — évite tout rappel MHD résiduel */
+    *upload_data_size = 0;
+
     int ret = http_send_json_response(connection, response);
     cJSON_Delete(response);
-
-    /* Fermeture de la connexion MariaDB — fin du cycle de vie */
     mysql_close(conn);
-    free(ctx);
-    *con_cls = NULL;
-
     return ret;
 }
