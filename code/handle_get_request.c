@@ -13,7 +13,8 @@ static MYSQL_RES *db_exec_static(MYSQL *conn, const char *query,
 {
     if (mysql_real_query(conn, query, (unsigned long)strlen(query))) {
         cJSON_AddStringToObject(json_response, "stmt exec", "KO");
-        cJSON_AddStringToObject(json_response, "errno", mysql_error(conn));
+        if (rest2sql_config.debug)
+            cJSON_AddStringToObject(json_response, "errno", mysql_error(conn));
         cJSON_AddNumberToObject(json_response, "httpcode",
                                 HTTP_INTERNAL_SERVER_ERROR);
         return NULL;
@@ -21,7 +22,8 @@ static MYSQL_RES *db_exec_static(MYSQL *conn, const char *query,
     MYSQL_RES *result = mysql_store_result(conn);
     if (result == NULL) {
         cJSON_AddStringToObject(json_response, "result fetch", "KO");
-        cJSON_AddStringToObject(json_response, "errno", mysql_error(conn));
+        if (rest2sql_config.debug)
+            cJSON_AddStringToObject(json_response, "errno", mysql_error(conn));
         cJSON_AddNumberToObject(json_response, "httpcode",
                                 HTTP_INTERNAL_SERVER_ERROR);
     }
@@ -41,7 +43,8 @@ static MYSQL_STMT *db_exec_prepared(MYSQL *conn, const char *query,
 
     if (mysql_stmt_prepare(stmt, query, (unsigned long)strlen(query))) {
         cJSON_AddStringToObject(json_response, "stmt prepare", "KO");
-        cJSON_AddStringToObject(json_response, "errno", mysql_stmt_error(stmt));
+        if (rest2sql_config.debug)
+            cJSON_AddStringToObject(json_response, "errno", mysql_stmt_error(stmt));
         cJSON_AddNumberToObject(json_response, "httpcode",
                                 HTTP_INTERNAL_SERVER_ERROR);
         mysql_stmt_close(stmt);
@@ -60,7 +63,8 @@ static MYSQL_STMT *db_exec_prepared(MYSQL *conn, const char *query,
         mysql_stmt_execute(stmt)            ||
         mysql_stmt_store_result(stmt)) {
         cJSON_AddStringToObject(json_response, "stmt exec", "KO");
-        cJSON_AddStringToObject(json_response, "errno", mysql_stmt_error(stmt));
+        if (rest2sql_config.debug)
+            cJSON_AddStringToObject(json_response, "errno", mysql_stmt_error(stmt));
         cJSON_AddNumberToObject(json_response, "httpcode",
                                 HTTP_INTERNAL_SERVER_ERROR);
         mysql_stmt_close(stmt);
@@ -207,8 +211,10 @@ cJSON *handle_get_request(MYSQL *conn, const char *url)
         "/%63[^/]/%63[^/]/%63[^/]/%63[^/]/%63[^/]/%295s",
         version, resource, schema, table, column, value);
 
-    cJSON_AddStringToObject(json_response, "apiversion", version);
-    cJSON_AddStringToObject(json_response, "url", url);
+    if (rest2sql_config.debug) {
+        cJSON_AddStringToObject(json_response, "apiversion", version);
+        cJSON_AddStringToObject(json_response, "url", url);
+    }
 
     size_t vlen = strlen(value);
     while (vlen > 0 && value[vlen - 1] == '/') value[--vlen] = '\0';
