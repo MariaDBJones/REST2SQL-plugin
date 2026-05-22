@@ -6,48 +6,8 @@
 
 /* ============================================================
  *  Helpers DB locaux
- *  (seront migrés dans handle_mariadb.c dans la prochaine étape)
  * ============================================================ */
 
-/**
- * Ouvre une connexion MariaDB via socket locale.
- * Credentials lus depuis les variables d'environnement.
- * Retourne le handle ou NULL en cas d'erreur (json_response rempli).
- */
-static MYSQL *db_connect(cJSON *json_response)
-{
-    MYSQL *conn = mysql_init(NULL);
-    if (conn == NULL) {
-        http_set_error(json_response, "mysql_init failed",
-                       HTTP_INTERNAL_SERVER_ERROR);
-        return NULL;
-    }
-
-    unsigned int timeout = 5;
-    mysql_options(conn, MYSQL_OPT_CONNECT_TIMEOUT, &timeout);
-
-    const char *db_host   = getenv("DB_HOST")   ? getenv("DB_HOST")   : "localhost";
-    const char *db_user   = getenv("DB_USER")   ? getenv("DB_USER")   : APIUSER;
-    const char *db_passwd = getenv("DB_PASSWD") ? getenv("DB_PASSWD") : APIPASSWORD;
-    const char *db_socket = getenv("DB_SOCKET") ? getenv("DB_SOCKET")
-                                                : "/var/lib/mysql/mysql.sock";
-
-    if (mysql_real_connect(conn, db_host, db_user, db_passwd,
-                           NULL, 0, db_socket, 0) == NULL) {
-        cJSON_AddStringToObject(json_response, "cnx", "KO");
-        cJSON_AddStringToObject(json_response, "errno", mysql_error(conn));
-        cJSON_AddNumberToObject(json_response, "httpcode",
-                                HTTP_INTERNAL_SERVER_ERROR);
-        mysql_close(conn);
-        return NULL;
-    }
-    return conn;
-}
-
-/**
- * Exécute une requête statique (sans paramètre utilisateur).
- * Retourne MYSQL_RES* ou NULL (json_response rempli).
- */
 static MYSQL_RES *db_exec_static(MYSQL *conn, const char *query,
                                  cJSON *json_response)
 {
@@ -68,11 +28,6 @@ static MYSQL_RES *db_exec_static(MYSQL *conn, const char *query,
     return result;
 }
 
-/**
- * Prépare, lie un seul paramètre STRING et exécute.
- * Retourne MYSQL_STMT* prêt à fetcher, ou NULL (json_response rempli).
- * L'appelant doit appeler mysql_stmt_close() après usage.
- */
 static MYSQL_STMT *db_exec_prepared(MYSQL *conn, const char *query,
                                     const char *param_val,
                                     cJSON *json_response)
@@ -95,11 +50,11 @@ static MYSQL_STMT *db_exec_prepared(MYSQL *conn, const char *query,
 
     MYSQL_BIND param;
     memset(&param, 0, sizeof(param));
-    unsigned long plen = (unsigned long)strlen(param_val);
-    param.buffer_type   = MYSQL_TYPE_STRING;
-    param.buffer        = (void *)param_val;
-    param.buffer_length = plen;
-    param.length        = &plen;
+    unsigned long plen      = (unsigned long)strlen(param_val);
+    param.buffer_type       = MYSQL_TYPE_STRING;
+    param.buffer            = (void *)param_val;
+    param.buffer_length     = plen;
+    param.length            = &plen;
 
     if (mysql_stmt_bind_param(stmt, &param) ||
         mysql_stmt_execute(stmt)            ||
@@ -114,9 +69,6 @@ static MYSQL_STMT *db_exec_prepared(MYSQL *conn, const char *query,
     return stmt;
 }
 
-/**
- * Sérialise un MYSQL_RES* (requête statique) en JSON.
- */
 static void db_static_result_to_json(MYSQL_RES *result, cJSON *json_response)
 {
     unsigned int  num_fields = mysql_num_fields(result);
@@ -148,9 +100,6 @@ static void db_static_result_to_json(MYSQL_RES *result, cJSON *json_response)
     cJSON_AddItemToObject(json_response, "data",   data_array);
 }
 
-/**
- * Sérialise un MYSQL_STMT* (prepared statement) en JSON.
- */
 static void db_stmt_result_to_json(MYSQL_STMT *stmt, cJSON *json_response)
 {
     MYSQL_RES *meta = mysql_stmt_result_metadata(stmt);
@@ -159,16 +108,15 @@ static void db_stmt_result_to_json(MYSQL_STMT *stmt, cJSON *json_response)
         return;
     }
 
-    unsigned int  num_fields = mysql_num_fields(meta);
-    MYSQL_FIELD  *fields     = mysql_fetch_fields(meta);
-    my_ulonglong  num_rows   = mysql_stmt_num_rows(stmt);
+    unsigned int  num_fields   = mysql_num_fields(meta);
+    MYSQL_FIELD  *fields       = mysql_fetch_fields(meta);
+    my_ulonglong  num_rows     = mysql_stmt_num_rows(stmt);
+    const size_t  COL_BUF_SIZE = 4096;
 
-    const size_t COL_BUF_SIZE = 4096;
-
-    MYSQL_BIND    *bind_res   = calloc(num_fields, sizeof(MYSQL_BIND));
-    char         **row_bufs   = calloc(num_fields, sizeof(char *));
-    unsigned long *lengths    = calloc(num_fields, sizeof(unsigned long));
-    my_bool       *is_nulls   = calloc(num_fields, sizeof(my_bool));
+    MYSQL_BIND    *bind_res = calloc(num_fields, sizeof(MYSQL_BIND));
+    char         **row_bufs = calloc(num_fields, sizeof(char *));
+    unsigned long *lengths  = calloc(num_fields, sizeof(unsigned long));
+    my_bool       *is_nulls = calloc(num_fields, sizeof(my_bool));
 
     if (!bind_res || !row_bufs || !lengths || !is_nulls) {
         free(bind_res); free(row_bufs); free(lengths); free(is_nulls);
@@ -228,8 +176,10 @@ static void db_stmt_result_to_json(MYSQL_STMT *stmt, cJSON *json_response)
 
 /* ============================================================
  *  handle_get_request
+ *  conn : connexion MariaDB du contexte MHD (con_cls).
+ *         Pas de mysql_close() ici — géré par http_request_handler.
  * ============================================================ */
-cJSON *handle_get_request(const char *url)
+cJSON *handle_get_request(MYSQL *conn, const char *url)
 {
     cJSON *json_response = cJSON_CreateObject();
     if (json_response == NULL)
@@ -237,7 +187,6 @@ cJSON *handle_get_request(const char *url)
 
 #if GETMETHODCORK == 0
 
-    /* Validation URL */
     if (!http_validate_url(url, json_response)) {
         HTTP_DEBUG_STAMP(json_response, "end");
         return json_response;
@@ -245,7 +194,6 @@ cJSON *handle_get_request(const char *url)
 
     HTTP_DEBUG_STAMP(json_response, "begin");
 
-    /* Parsing */
     char version[64]  = {0};
     char resource[64] = {0};
     char schema[64]   = {0};
@@ -260,11 +208,9 @@ cJSON *handle_get_request(const char *url)
     cJSON_AddStringToObject(json_response, "apiversion", version);
     cJSON_AddStringToObject(json_response, "url", url);
 
-    /* Suppression du slash final sur value */
     size_t vlen = strlen(value);
     while (vlen > 0 && value[vlen - 1] == '/') value[--vlen] = '\0';
 
-    /* Validation identifiants SQL (ne peuvent pas être des paramètres ?) */
     const char *idents[] = { schema, table, column, NULL };
     for (int k = 0; idents[k] != NULL; k++) {
         if (*idents[k] != '\0' && !http_is_valid_sql_ident(idents[k])) {
@@ -277,21 +223,11 @@ cJSON *handle_get_request(const char *url)
 
     HTTP_DEBUG_STAMP(json_response, "after validation");
 
-    /* Connexion */
-    MYSQL *conn = db_connect(json_response);
-    if (conn == NULL) {
-        HTTP_DEBUG_STAMP(json_response, "end");
-        return json_response;
-    }
-
-    HTTP_DEBUG_STAMP(json_response, "after cnx");
-
-    /* Dispatch */
     if (strcasecmp(resource, "ping") == 0 && nb_tokens == 2) {
         const char *q = "SELECT now()";
         cJSON_AddStringToObject(json_response, "SQL", q);
         MYSQL_RES *res = db_exec_static(conn, q, json_response);
-        if (res == NULL) { mysql_close(conn); HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
+        if (res == NULL) { HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
         db_static_result_to_json(res, json_response);
         mysql_free_result(res);
 
@@ -299,47 +235,42 @@ cJSON *handle_get_request(const char *url)
         const char *q = "SHOW GLOBAL STATUS";
         cJSON_AddStringToObject(json_response, "SQL", q);
         MYSQL_RES *res = db_exec_static(conn, q, json_response);
-        if (res == NULL) { mysql_close(conn); HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
+        if (res == NULL) { HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
         db_static_result_to_json(res, json_response);
         mysql_free_result(res);
 
     } else if (strcasecmp(resource, "status") == 0 && nb_tokens == 3) {
-        /* ✅ Prepared statement : filtre LIKE = paramètre ? */
         char like_val[sizeof(schema) + 2];
         snprintf(like_val, sizeof(like_val), "%%%s%%", schema);
         const char *q = "SHOW GLOBAL STATUS LIKE ?";
         cJSON_AddStringToObject(json_response, "SQL", q);
         MYSQL_STMT *stmt = db_exec_prepared(conn, q, like_val, json_response);
-        if (stmt == NULL) { mysql_close(conn); HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
+        if (stmt == NULL) { HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
         db_stmt_result_to_json(stmt, json_response);
         mysql_stmt_close(stmt);
 
     } else if (strcasecmp(resource, "struct") == 0 && nb_tokens == 4) {
-        /* schema et table validés [A-Za-z0-9_] → backticks suffisent */
         char q[QUERY_MAX_LEN];
         snprintf(q, sizeof(q), "SHOW COLUMNS FROM `%s`.`%s`", schema, table);
         cJSON_AddStringToObject(json_response, "SQL", q);
         MYSQL_RES *res = db_exec_static(conn, q, json_response);
-        if (res == NULL) { mysql_close(conn); HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
+        if (res == NULL) { HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
         db_static_result_to_json(res, json_response);
         mysql_free_result(res);
 
     } else if (strcasecmp(resource, "data") == 0 && nb_tokens == 6) {
-        /* ✅ Prepared statement : value = paramètre ?              */
-        /* schema, table, column validés [A-Za-z0-9_] + backticks  */
         char q[QUERY_MAX_LEN];
         snprintf(q, sizeof(q),
                  "SELECT * FROM `%s`.`%s` WHERE `%s` = ?",
                  schema, table, column);
         cJSON_AddStringToObject(json_response, "SQL", q);
         MYSQL_STMT *stmt = db_exec_prepared(conn, q, value, json_response);
-        if (stmt == NULL) { mysql_close(conn); HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
+        if (stmt == NULL) { HTTP_DEBUG_STAMP(json_response, "end"); return json_response; }
         db_stmt_result_to_json(stmt, json_response);
         mysql_stmt_close(stmt);
 
     } else {
         http_set_error(json_response, "Bad request", HTTP_NOT_FOUND);
-        mysql_close(conn);
         HTTP_DEBUG_STAMP(json_response, "end");
         return json_response;
     }
@@ -347,10 +278,8 @@ cJSON *handle_get_request(const char *url)
     cJSON_AddNumberToObject(json_response, "httpcode", HTTP_OK);
     HTTP_DEBUG_STAMP(json_response, "end");
 
-    mysql_close(conn);
-
 #else
-        http_set_error(json_response, "GET method disabled", HTTP_METHOD_NOT_ALLOWED);
+    http_set_error(json_response, "GET method disabled", HTTP_METHOD_NOT_ALLOWED);
 #endif
     return json_response;
 }
