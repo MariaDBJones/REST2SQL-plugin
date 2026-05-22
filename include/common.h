@@ -87,6 +87,11 @@
 #define DEFAULT_PORT    8080
 #define DEFAULT_ADDRESS "0.0.0.0"
 
+/* Taille maximale d'un body HTTP accepté.
+ * MHD retourne 413 automatiquement si dépassé —
+ * garantit qu'un body tient toujours dans un seul appel handler. */
+#define MAX_BODY_SIZE   (16 * 1024)   /* 16 kb */
+
 // TODO : obfuscate
 // read variables from [rest2sql] group in cnf files
 // all variables will be prefixed with rest2sql :

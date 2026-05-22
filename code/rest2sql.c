@@ -166,11 +166,15 @@ static int rest2sql_init(void *p)
         (uint16_t)rest2sql_config.port,
         NULL, NULL,
         &http_request_handler, NULL,
-        MHD_OPTION_SOCK_ADDR, &addr,
+        MHD_OPTION_SOCK_ADDR,               &addr,
+        /* Limite le body à MAX_BODY_SIZE octets.
+         * Si un client envoie plus, MHD répond 413 automatiquement
+         * sans appeler le handler — garantit 1 seul appel par requête. */
+        MHD_OPTION_CONNECTION_MEMORY_LIMIT, (size_t)MAX_BODY_SIZE,
         /* MHD_OPTION_THREAD_POOL_SIZE, rest2sql_config.concurrency, */ /* TODO */
-        MHD_OPTION_NOTIFY_CONNECTION, connection_start,
-                                      connection_finish,
-                                      NULL,
+        MHD_OPTION_NOTIFY_CONNECTION,       connection_start,
+                                            connection_finish,
+                                            NULL,
         MHD_OPTION_END
     );
 
@@ -212,8 +216,8 @@ static int rest2sql_init(void *p)
         return 1;
     }
 
-    fprintf(stderr, "[rest2sql] Server running on %s:%d\n",
-            rest2sql_config.address, rest2sql_config.port);
+    fprintf(stderr, "[rest2sql] Server running on %s:%d (max body: %d bytes)\n",
+            rest2sql_config.address, rest2sql_config.port, MAX_BODY_SIZE);
     return 0;
 }
 
